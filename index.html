@@ -96,10 +96,7 @@
     <div id="view-cadastro" class="hidden">
       <h2 class="section-title">Cadastrar acumulação</h2>
       <p class="section-sub">Grava direto na planilha da CPAC.</p>
-      <div class="grid2" style="margin-bottom:18px;">
-        <div><label>Nome completo</label><input id="cad-nome" type="text"></div>
-        <div><label>Matrícula SEEDF</label><input id="cad-matricula" type="text" placeholder="0000000-0"></div>
-      </div>
+      <div style="margin-bottom:18px;"><label>Nome completo</label><input id="cad-nome" type="text"></div>
       <div style="margin-bottom:18px;"><label>Número do processo</label><input id="cad-processo" type="text" placeholder="00080-00000000/2026-00"></div>
 
       <div class="box">
@@ -110,7 +107,23 @@
         </div>
         <div class="grid2" style="margin-top:10px;">
           <select id="cad-ch1"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
-          <input id="cad-unigep1" type="text" placeholder="Unidade (UNIGEP)">
+          <select id="cad-unigep1">
+            <option>Sede</option>
+            <option>Brazlândia</option>
+            <option>Ceilândia</option>
+            <option>Gama</option>
+            <option>Guará</option>
+            <option>Núcleo Bandeirante</option>
+            <option>Paranoá</option>
+            <option>Planaltina</option>
+            <option>Plano Piloto</option>
+            <option>Recanto das Emas</option>
+            <option>Samambaia</option>
+            <option>Santa Maria</option>
+            <option>São Sebastião</option>
+            <option>Sobradinho</option>
+            <option>Taguatinga</option>
+          </select>
         </div>
       </div>
 
@@ -128,6 +141,23 @@
         </div>
         <div class="grid2" style="margin-top:10px;">
           <select id="cad-ch2"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
+          <select id="cad-unigep2" class="hidden">
+            <option>Sede</option>
+            <option>Brazlândia</option>
+            <option>Ceilândia</option>
+            <option>Gama</option>
+            <option>Guará</option>
+            <option>Núcleo Bandeirante</option>
+            <option>Paranoá</option>
+            <option>Planaltina</option>
+            <option>Plano Piloto</option>
+            <option>Recanto das Emas</option>
+            <option>Samambaia</option>
+            <option>Santa Maria</option>
+            <option>São Sebastião</option>
+            <option>Sobradinho</option>
+            <option>Taguatinga</option>
+          </select>
           <input id="cad-orgao2" type="text" placeholder="Órgão / entidade">
         </div>
       </div>
@@ -344,9 +374,34 @@ document.getElementById('go-cadastro-always').addEventListener('click', () => {
 // CADASTRO REAL (fetch POST na API)
 // ---------------------------------------------------------------------
 document.getElementById('cad-cancel').addEventListener('click', () => showView('view-search'));
+
+const cadCategoria = document.getElementById('cad-categoria');
+const cadUnigep2 = document.getElementById('cad-unigep2');
+const cadOrgao2 = document.getElementById('cad-orgao2');
+
+function atualizarCampoVinculo2() {
+  const val = cadCategoria.value;
+  if (val === 'SEDF + SEDF') {
+    cadUnigep2.classList.remove('hidden');
+    cadOrgao2.classList.add('hidden');
+    cadOrgao2.value = '';
+  } else if (val === 'SEDF + OUTRO') {
+    cadUnigep2.classList.add('hidden');
+    cadUnigep2.value = '';
+    cadOrgao2.classList.remove('hidden');
+  } else { // CONTRATO TEMPORÁRIO
+    cadUnigep2.classList.add('hidden');
+    cadUnigep2.value = '';
+    cadOrgao2.classList.add('hidden');
+    cadOrgao2.value = '';
+  }
+}
+cadCategoria.addEventListener('change', atualizarCampoVinculo2);
+atualizarCampoVinculo2();
+
 document.getElementById('cad-salvar').addEventListener('click', async () => {
   const body = {
-    categoria: document.getElementById('cad-categoria').value,
+    categoria: cadCategoria.value,
     processo: document.getElementById('cad-processo').value,
     nome: document.getElementById('cad-nome').value,
     cargo1: document.getElementById('cad-cargo1').value,
@@ -355,7 +410,7 @@ document.getElementById('cad-salvar').addEventListener('click', async () => {
     unigep1: document.getElementById('cad-unigep1').value,
     cargo2: document.getElementById('cad-cargo2').value,
     mat2: document.getElementById('cad-mat2').value,
-    orgao2: document.getElementById('cad-orgao2').value,
+    orgao2: cadCategoria.value === 'SEDF + SEDF' ? cadUnigep2.value : cadOrgao2.value,
     ch2: document.getElementById('cad-ch2').value
   };
   const btn = document.getElementById('cad-salvar');
