@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análise de Acumulação de Cargos · CPAC/SEEDF</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, 'Inter', Arial, sans-serif; background: #F1EFE8; margin: 0; padding: 24px; color: #2C2C2A; }
+  .app { max-width: 760px; margin: 0 auto; }
+  .header { background: #1B3A5C; border-radius: 12px 12px 0 0; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .header .title { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 19px; color: #F7F5F1; }
+  .header .subtitle { margin: 2px 0 0; font-size: 12.5px; color: #B8C4D1; }
+  .steps { background: #F7F5F1; border: 1px solid #E4E0D4; border-top: none; padding: 22px 28px 8px; display: flex; align-items: center; }
+  .step-item { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .step-circle { width: 26px; height: 26px; border-radius: 50%; background: #D6D0C0; color: #6B6A62; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 500; }
+  .step-circle.active { background: #1B3A5C; color: #F7F5F1; }
+  .step-circle.done { background: #B8862B; color: #FFF; }
+  .step-label { font-size: 13px; color: #6B6A62; }
+  .step-label.active { color: #1B3A5C; font-weight: 500; }
+  .step-line { flex: 1; height: 1px; background: #D6D0C0; margin: 0 12px; }
+  .card { background: #FFFFFF; border: 1px solid #E4E0D4; border-top: none; border-radius: 0 0 12px 12px; padding: 26px 28px 28px; }
+  h2.section-title { margin: 0 0 4px; font-family: Georgia, serif; font-size: 16px; color: #1B3A5C; font-weight: normal; }
+  p.section-sub { margin: 0 0 18px; font-size: 12.5px; color: #6B6A62; }
+  label { font-size: 12px; color: #6B6A62; display: block; margin-bottom: 4px; }
+  input, select, textarea {
+    width: 100%; padding: 8px 10px; font-size: 13px; border-radius: 6px;
+    background: #FFFFFF !important; color: #2C2C2A !important; border: 1px solid #C9C7BC !important;
+  }
+  input::placeholder { color: #9A988D; }
+  button { border-radius: 6px; cursor: pointer; font-size: 13px; padding: 8px 16px; border: 1px solid #C9C7BC; background: #FFFFFF; color: #2C2C2A; }
+  button.primary { background: #1B3A5C; color: #FFFFFF; border-color: #1B3A5C; }
+  button.outline-blue { background: #FFFFFF; color: #1B3A5C; border-color: #1B3A5C; }
+  button.gold { background: #B8862B; color: #FFFFFF; border-color: #B8862B; }
+  .row { display: flex; gap: 10px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .box { border: 1px solid #E4E0D4; border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; }
+  .result-card { border: 1px solid #97C459; background: #EAF3DE; border-radius: 8px; padding: 14px 16px; margin-bottom: 8px; }
+  .badge { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.4px; color: #27500A; background: #D4E8B8; padding: 2px 8px; border-radius: 10px; }
+  .muted { color: #6B6A62; }
+  .hidden { display: none !important; }
+  .warn-box { border: 1px dashed #C9A24B; background: #FAF3E2; border-radius: 8px; padding: 14px 16px; display: flex; gap: 10px; }
+  #loading-indicator { font-size: 12.5px; color: #6B6A62; padding: 8px 0; }
+  @media print {
+    body * { visibility: hidden; }
+    #ficha-print-area, #ficha-print-area * { visibility: visible; }
+    #ficha-print-area { position: absolute; left: 0; top: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <div>
+      <p class="title">Análise de acumulação de cargos</p>
+      <p class="subtitle">SEEDF · Comissão Permanente de Acumulação de Cargos</p>
+    </div>
+    <div style="text-align:right; border-left:1px solid #3A567A; padding-left:16px;">
+      <p style="margin:0; font-size:10.5px; color:#8FA3B8; text-transform:uppercase;">Fonte de dados</p>
+      <p style="margin:2px 0 0; font-size:13px; color:#E8C77A;">Planilha CPAC (ao vivo)</p>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step-item" data-step="1"><div class="step-circle active" data-circle="1">1</div><span class="step-label active" data-label="1">Servidor e cargos</span></div>
+    <div class="step-line"></div>
+    <div class="step-item" data-step="2"><div class="step-circle" data-circle="2">2</div><span class="step-label" data-label="2">Folhas de ponto</span></div>
+    <div class="step-line"></div>
+    <div class="step-item" data-step="3"><div class="step-circle" data-circle="3">3</div><span class="step-label" data-label="3">Conclusão</span></div>
+  </div>
+
+  <div class="card">
+
+    <!-- BUSCA -->
+    <div id="view-search">
+      <h2 class="section-title">Buscar servidor</h2>
+      <p class="section-sub">Busca em tempo real na planilha de controle da CPAC.</p>
+      <div class="row" style="margin-bottom:10px;">
+        <button type="button" class="search-type-btn primary" data-type="nome">Nome</button>
+        <button type="button" class="search-type-btn" data-type="matricula">Matrícula</button>
+        <button type="button" class="search-type-btn" data-type="processo">Número do processo</button>
+      </div>
+      <div class="row" style="margin-bottom:8px;">
+        <input id="search-input" type="text" placeholder="Nome completo do servidor" style="flex:1;">
+        <button type="button" id="search-btn" class="primary"><i class="ti ti-search"></i> Buscar</button>
+        <button type="button" id="go-cadastro-always" class="outline-blue"><i class="ti ti-plus"></i> Cadastrar acumulação</button>
+      </div>
+      <p id="search-hint" style="font-size:11.5px; color:#8A897F; margin:0 0 18px;">Digite um nome e clique em Buscar.</p>
+      <div id="loading-indicator" class="hidden">Buscando na planilha...</div>
+      <div id="search-result"></div>
+    </div>
+
+    <!-- CADASTRO -->
+    <div id="view-cadastro" class="hidden">
+      <h2 class="section-title">Cadastrar acumulação</h2>
+      <p class="section-sub">Grava direto na planilha da CPAC.</p>
+      <div class="grid2" style="margin-bottom:18px;">
+        <div><label>Nome completo</label><input id="cad-nome" type="text"></div>
+        <div><label>Matrícula SEEDF</label><input id="cad-matricula" type="text" placeholder="0000000-0"></div>
+      </div>
+      <div style="margin-bottom:18px;"><label>Número do processo</label><input id="cad-processo" type="text" placeholder="00080-00000000/2026-00"></div>
+
+      <div class="box">
+        <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Vínculo 1 · SEDF</p>
+        <div class="grid2">
+          <input id="cad-cargo1" type="text" placeholder="Cargo">
+          <input id="cad-mat1" type="text" placeholder="Matrícula">
+        </div>
+        <div class="grid2" style="margin-top:10px;">
+          <select id="cad-ch1"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
+          <input id="cad-unigep1" type="text" placeholder="Unidade (UNIGEP)">
+        </div>
+      </div>
+
+      <div class="box">
+        <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Vínculo 2 · Segundo cargo</p>
+        <label>Categoria do vínculo</label>
+        <select id="cad-categoria" style="margin-bottom:10px;">
+          <option value="SEDF + SEDF">Outro cargo SEEDF</option>
+          <option value="SEDF + OUTRO">Outro órgão / ente federativo</option>
+          <option value="CONTRATO TEMPORÁRIO">Contrato temporário</option>
+        </select>
+        <div class="grid2">
+          <input id="cad-cargo2" type="text" placeholder="Cargo">
+          <input id="cad-mat2" type="text" placeholder="Matrícula">
+        </div>
+        <div class="grid2" style="margin-top:10px;">
+          <select id="cad-ch2"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
+          <input id="cad-orgao2" type="text" placeholder="Órgão / entidade">
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between;">
+        <button type="button" id="cad-cancel"><i class="ti ti-arrow-left"></i> Cancelar</button>
+        <button type="button" id="cad-salvar" class="primary">Salvar cadastro</button>
+      </div>
+    </div>
+
+    <!-- FICHA -->
+    <div id="view-ficha" class="hidden">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <button type="button" id="ficha-voltar"><i class="ti ti-arrow-left"></i> Voltar à busca</button>
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="ficha-migrar-toggle" style="color:#B8862B; border-color:#B8862B;"><i class="ti ti-transfer"></i> Registrar mudança de categoria</button>
+          <button type="button" id="ficha-baixar" class="primary"><i class="ti ti-download"></i> Baixar ficha em PDF</button>
+        </div>
+      </div>
+
+      <div id="migrar-painel" class="hidden warn-box" style="flex-direction:column; margin-bottom:18px;">
+        <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#85560B;">Registrar mudança de categoria</p>
+        <div class="grid2" style="margin-bottom:10px;">
+          <div><label>Motivo</label>
+            <select id="mig-motivo">
+              <option value="APOSENTADORIA">Aposentadoria</option>
+              <option value="RESERVA/REFORMA">Reserva/Reforma</option>
+              <option value="PENSÃO">Pensão</option>
+              <option value="PERDA DE OBJETO">Perda de objeto</option>
+            </select>
+          </div>
+          <div><label>Categoria de destino</label>
+            <select id="mig-destino">
+              <option>APOSENTADORIA / RESERVA</option>
+              <option>PENSÃO</option>
+              <option>PERDA DE OBJETO</option>
+              <option>SEDF + SEDF</option>
+              <option>SEDF + OUTRO</option>
+              <option>SUB JUDICE / CORREGEDORIA</option>
+              <option>CONTRATO TEMPORÁRIO</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid2" style="margin-bottom:10px;">
+          <div><label>Cargo alvo</label>
+            <select id="mig-cargo-alvo"><option value="cargo1">Vínculo 1 (SEDF)</option><option value="cargo2">Vínculo 2 (outro)</option></select>
+          </div>
+          <div><label>Data do fato (opcional)</label><input id="mig-data-fato" type="text" placeholder="dd/mm/aaaa"></div>
+        </div>
+        <div style="margin-bottom:12px;"><label>Observação extra (opcional)</label><input id="mig-obs-extra" type="text"></div>
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button type="button" id="mig-cancelar">Cancelar</button>
+          <button type="button" id="mig-confirmar" class="gold">Confirmar migração</button>
+        </div>
+        <p id="mig-resultado" class="hidden" style="margin:12px 0 0; font-size:12.5px; color:#27500A; background:#EAF3DE; border-radius:6px; padding:10px 12px; line-height:1.6;"></p>
+      </div>
+
+      <div id="ficha-conteudo" style="border:1px solid #E4E0D4; border-radius:8px; padding:24px;"></div>
+    </div>
+
+    <!-- FOLHAS DE PONTO -->
+    <div id="view-2" class="hidden">
+      <h2 class="section-title">Folhas de ponto do período</h2>
+      <p class="section-sub">Para cada cargo, escolha o ano e o mês. Preencha os horários cumpridos dia a dia e anexe a folha de ponto correspondente.</p>
+      <div class="warn-box" style="margin-bottom:16px;">
+        <i class="ti ti-info-circle" style="font-size:18px; color:#85560B;"></i>
+        <div><p style="margin:0; font-size:12.5px; color:#854F0B;">Esta etapa ainda funciona apenas nesta sessão do navegador — os horários preenchidos aqui não são salvos na planilha ainda. Isso será resolvido na próxima etapa do projeto (lógica de decisão).</p></div>
+      </div>
+      <div id="ponto-cargos"></div>
+      <div style="display:flex; justify-content:space-between; margin-top:22px;">
+        <button type="button" id="back-step1"><i class="ti ti-arrow-left"></i> Voltar</button>
+        <button type="button" id="go-step3" class="primary">Avançar para conclusão <i class="ti ti-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- CONCLUSÃO -->
+    <div id="view-3" class="hidden">
+      <h2 class="section-title">Conclusão da análise</h2>
+      <p class="section-sub">Resumo dos cargos e períodos preenchidos. A lógica de decisão será conectada nesta etapa.</p>
+      <div id="resumo-box" style="background:#F7F5F1; border-radius:8px; padding:16px; margin-bottom:16px;"><p class="muted" style="margin:0; font-size:13px;">O resumo aparecerá aqui.</p></div>
+      <div class="warn-box">
+        <i class="ti ti-clock-hour-4" style="font-size:18px; color:#85560B;"></i>
+        <div><p style="margin:0; font-size:13px; color:#633806; font-weight:500;">Aguardando lógica de decisão</p><p style="margin:4px 0 0; font-size:12.5px; color:#854F0B;">A conclusão automática pela compatibilidade de horários entrará nesta etapa.</p></div>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-top:22px;">
+        <button type="button" id="back-step2"><i class="ti ti-arrow-left"></i> Voltar</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// CONFIGURAÇÃO: troque pela URL da sua implantação do Apps Script
+// =====================================================================
+const API_URL = 'https://script.google.com/macros/s/AKfycbycV6PV1dppAc6pVT4h3GM06_5KJhZQm6tOg3xF__cig5UsWImi2858_1is9S6ZYEQjaw/exec';
+
+let state = { cargos: [], nome: '' };
+let searchType = 'nome';
+let registroAtualFicha = null;
+
+const searchInput = document.getElementById('search-input');
+const searchResult = document.getElementById('search-result');
+const searchHint = document.getElementById('search-hint');
+const loadingIndicator = document.getElementById('loading-indicator');
+const pontoCargos = document.getElementById('ponto-cargos');
+const resumoBox = document.getElementById('resumo-box');
+const fichaConteudo = document.getElementById('ficha-conteudo');
+const migrarPainel = document.getElementById('migrar-painel');
+const migResultado = document.getElementById('mig-resultado');
+
+function esc(s) { return (s === undefined || s === null || s === '') ? '—' : String(s); }
+
+const placeholders = { nome: 'Nome completo do servidor', matricula: 'Ex.: 2003.227-7 ou 20032277', processo: 'Ex.: 00080-00086543/2026-65' };
+const hints = { nome: 'Digite um nome e clique em Buscar.', matricula: 'Funciona com ou sem pontuação.', processo: 'Digite o número do processo.' };
+
+document.querySelectorAll('.search-type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    searchType = btn.getAttribute('data-type');
+    document.querySelectorAll('.search-type-btn').forEach(b => b.classList.toggle('primary', b === btn));
+    searchInput.placeholder = placeholders[searchType];
+    searchHint.textContent = hints[searchType];
+    searchInput.value = '';
+    searchResult.innerHTML = '';
+  });
+});
+
+// ---------------------------------------------------------------------
+// BUSCA REAL (fetch GET na API)
+// ---------------------------------------------------------------------
+async function buscarNaAPI(tipo, termo) {
+  const url = API_URL + '?type=' + encodeURIComponent(tipo) + '&query=' + encodeURIComponent(termo);
+  const resp = await fetch(url);
+  const data = await resp.json();
+  if (data.erro) throw new Error(data.erro);
+  return data.resultados || [];
+}
+
+function buildCargos(r) {
+  const cargos = [];
+  if (r.categoria === 'CONTRATO TEMPORÁRIO') {
+    cargos.push({ label: 'Vínculo 1 · Contrato temporário SEEDF', mat: r.mat1 || '' });
+    cargos.push({ label: (r.cargo2 || 'Cargo 2') + (r.orgao2 ? ' · ' + r.orgao2 : ''), mat: '' });
+  } else {
+    cargos.push({ label: (r.cargo1 || 'Cargo 1') + (r.unigep1 ? ' · ' + r.unigep1 : ''), ch: r.ch1 || '', mat: r.mat1 || '' });
+    cargos.push({ label: (r.cargo2 || 'Cargo 2') + (r.orgao2 ? ' · ' + r.orgao2 : (r.unigep2 ? ' · ' + r.unigep2 : '')), ch: r.ch2 || '', mat: r.mat2 || '' });
+  }
+  return cargos;
+}
+
+function renderSearchResult(records, value) {
+  if (records.length) {
+    searchResult.innerHTML = '<p style="margin:0 0 8px; font-size:12px; color:#6B6A62;">' + records.length + ' resultado(s) encontrado(s):</p>';
+    records.forEach((record) => {
+      const card = document.createElement('div');
+      card.className = 'result-card';
+      const badge = '<span class="badge">' + esc(record.categoria) + '</span>';
+      card.innerHTML =
+        '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">' +
+        '<p style="margin:0; font-size:13px; font-weight:500; color:#27500A;">' + esc(record.nome) + '</p>' + badge + '</div>' +
+        '<p style="margin:0 0 8px; font-size:12px; color:#3B6D11;">Processo ' + esc(record.processo) + ' · linha ' + esc(record.linha) + '</p>' +
+        '<div class="cargos-list" style="margin-bottom:10px;"></div>' +
+        '<div style="display:flex; justify-content:flex-end; gap:8px;">' +
+        '<button type="button" class="ver-ficha outline-blue"><i class="ti ti-file-text"></i> Ver ficha completa</button>' +
+        '<button type="button" class="use-record primary">Usar este cadastro <i class="ti ti-arrow-right"></i></button></div>';
+      searchResult.appendChild(card);
+      const list = card.querySelector('.cargos-list');
+      buildCargos(record).forEach(c => {
+        const row = document.createElement('div');
+        row.style.cssText = 'font-size:12px; color:#3B6D11; padding:2px 0;';
+        row.textContent = c.label + (c.ch ? ' · CH ' + c.ch : '') + (c.mat ? ' · mat. ' + c.mat : '');
+        list.appendChild(row);
+      });
+      card.querySelector('.use-record').addEventListener('click', () => {
+        state.nome = record.nome;
+        state.cargos = buildCargos(record).map((c, i) => ({ id: i + 1, label: c.label, periods: {} }));
+        setStep(2);
+      });
+      card.querySelector('.ver-ficha').addEventListener('click', () => {
+        renderFicha(record);
+        showView('view-ficha');
+      });
+    });
+  } else {
+    searchResult.innerHTML = '<div class="box" style="text-align:center;"><p class="muted" style="margin:0; font-size:13px;">Nenhuma acumulação cadastrada para "' + esc(value) + '". Use o botão "Cadastrar acumulação" acima.</p></div>';
+  }
+}
+
+document.getElementById('search-btn').addEventListener('click', async () => {
+  const value = searchInput.value.trim();
+  if (!value) return;
+  loadingIndicator.classList.remove('hidden');
+  searchResult.innerHTML = '';
+  try {
+    const records = await buscarNaAPI(searchType, value);
+    renderSearchResult(records, value);
+  } catch (err) {
+    searchResult.innerHTML = '<div class="box" style="text-align:center; border-color:#D98C8C;"><p style="margin:0; font-size:13px; color:#A33;">Erro ao buscar: ' + esc(err.message) + '</p></div>';
+  } finally {
+    loadingIndicator.classList.add('hidden');
+  }
+});
+searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('search-btn').click(); });
+
+document.getElementById('go-cadastro-always').addEventListener('click', () => {
+  if (searchType === 'nome') document.getElementById('cad-nome').value = searchInput.value.trim();
+  if (searchType === 'matricula') document.getElementById('cad-mat1').value = searchInput.value.trim();
+  if (searchType === 'processo') document.getElementById('cad-processo').value = searchInput.value.trim();
+  showView('view-cadastro');
+});
+
+// ---------------------------------------------------------------------
+// CADASTRO REAL (fetch POST na API)
+// ---------------------------------------------------------------------
+document.getElementById('cad-cancel').addEventListener('click', () => showView('view-search'));
+document.getElementById('cad-salvar').addEventListener('click', async () => {
+  const body = {
+    categoria: document.getElementById('cad-categoria').value,
+    processo: document.getElementById('cad-processo').value,
+    nome: document.getElementById('cad-nome').value,
+    cargo1: document.getElementById('cad-cargo1').value,
+    mat1: document.getElementById('cad-mat1').value,
+    ch1: document.getElementById('cad-ch1').value,
+    unigep1: document.getElementById('cad-unigep1').value,
+    cargo2: document.getElementById('cad-cargo2').value,
+    mat2: document.getElementById('cad-mat2').value,
+    orgao2: document.getElementById('cad-orgao2').value,
+    ch2: document.getElementById('cad-ch2').value
+  };
+  const btn = document.getElementById('cad-salvar');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    const resp = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+    const data = await resp.json();
+    if (data.erro) throw new Error(data.erro);
+    showView('view-search');
+    searchResult.innerHTML = '<div class="result-card"><p style="margin:0; font-size:13px; font-weight:500; color:#27500A;"><i class="ti ti-check"></i> ' + esc(data.mensagem) + '</p></div>';
+  } catch (err) {
+    alert('Erro ao cadastrar: ' + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar cadastro';
+  }
+});
+
+// ---------------------------------------------------------------------
+// FICHA + MIGRAÇÃO REAL
+// ---------------------------------------------------------------------
+function renderFicha(record) {
+  registroAtualFicha = record;
+  migrarPainel.classList.add('hidden');
+  migResultado.classList.add('hidden');
+  document.getElementById('mig-motivo').value = 'APOSENTADORIA';
+  sugerirDestino();
+
+  const hoje = new Date();
+  const dataEmissao = String(hoje.getDate()).padStart(2, '0') + '/' + String(hoje.getMonth() + 1).padStart(2, '0') + '/' + hoje.getFullYear();
+  fichaConteudo.innerHTML =
+    '<div id="ficha-print-area">' +
+    '<div style="display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid #1B3A5C; padding-bottom:12px; margin-bottom:18px;">' +
+    '<div><p style="margin:0; font-family:Georgia,serif; font-size:16px; color:#1B3A5C;">Ficha de Acumulação de Cargos</p>' +
+    '<p style="margin:2px 0 0; font-size:11.5px; color:#6B6A62;">SEEDF · Comissão Permanente de Acumulação de Cargos (CPAC)</p></div>' +
+    '<p style="margin:0; font-size:11px; color:#8A897F;">Emitida em ' + dataEmissao + '</p></div>' +
+    '<table style="width:100%; border-collapse:collapse; font-size:13px; margin-bottom:18px;">' +
+    '<tr><td style="padding:4px 0; color:#6B6A62; width:160px;">Nome</td><td style="padding:4px 0; font-weight:500;">' + esc(record.nome) + '</td></tr>' +
+    '<tr><td style="padding:4px 0; color:#6B6A62;">Processo</td><td style="padding:4px 0;">' + esc(record.processo) + '</td></tr>' +
+    '</table>' +
+    '<p style="margin:0 0 8px; font-size:13px; font-weight:500; color:#1B3A5C; border-top:1px solid #E4E0D4; padding-top:14px;">Vínculo 1</p>' +
+    '<table style="width:100%; border-collapse:collapse; font-size:12.5px; margin-bottom:16px;">' +
+    '<tr><td style="padding:3px 0; color:#6B6A62; width:160px;">Cargo</td><td style="padding:3px 0;">' + esc(record.cargo1) + '</td></tr>' +
+    '<tr><td style="padding:3px 0; color:#6B6A62;">Matrícula</td><td style="padding:3px 0;">' + esc(record.mat1) + '</td></tr>' +
+    '<tr><td style="padding:3px 0; color:#6B6A62;">Carga horária</td><td style="padding:3px 0;">' + (record.ch1 ? record.ch1 + 'h semanais' : '—') + '</td></tr>' +
+    '<tr><td style="padding:3px 0; color:#6B6A62;">Unidade (UNIGEP)</td><td style="padding:3px 0;">' + esc(record.unigep1) + '</td></tr>' +
+    '</table>' +
+    '<p style="margin:0 0 8px; font-size:13px; font-weight:500; color:#1B3A5C; border-top:1px solid #E4E0D4; padding-top:14px;">Vínculo 2</p>' +
+    '<table style="width:100%; border-collapse:collapse; font-size:12.5px; margin-bottom:16px;">' +
+    '<tr><td style="padding:3px 0; color:#6B6A62; width:160px;">Cargo</td><td style="padding:3px 0;">' + esc(record.cargo2) + '</td></tr>' +
+    '<tr><td style="padding:3px 0; color:#6B6A62;">Matrícula</td><td style="padding:3px 0;">' + esc(record.mat2) + '</td></tr>' +
+    '<tr><td style="padding:3px 0; color:#6B6A62;">Carga horária</td><td style="padding:3px 0;">' + (record.ch2 ? record.ch2 + 'h semanais' : '—') + '</td></tr>' +
+    '<tr><td style="padding:3px 0; color:#6B6A62;">Órgão / entidade</td><td style="padding:3px 0;">' + esc(record.orgao2 || record.unigep2) + '</td></tr>' +
+    '</table>' +
+    '<p style="margin:0 0 8px; font-size:13px; font-weight:500; color:#1B3A5C; border-top:1px solid #E4E0D4; padding-top:14px;">Último parecer</p>' +
+    '<div style="background:#F7F5F1; border-radius:6px; padding:12px 14px; font-size:12.5px; line-height:1.6;">' +
+    '<p style="margin:0;">' + esc(record.parecer) + '</p>' +
+    (record.observacao ? '<p style="margin:8px 0 0;"><strong>Observação:</strong> ' + esc(record.observacao) + '</p>' : '') +
+    '</div>' +
+    '<p style="margin:20px 0 0; font-size:10.5px; color:#8A897F; text-align:center;">Documento gerado automaticamente a partir da base de controle de processos da CPAC/SEEDF — uso interno.</p>' +
+    '</div>';
+}
+
+document.getElementById('ficha-voltar').addEventListener('click', () => showView('view-search'));
+document.getElementById('ficha-baixar').addEventListener('click', () => window.print());
+document.getElementById('ficha-migrar-toggle').addEventListener('click', () => {
+  migrarPainel.classList.toggle('hidden');
+  migResultado.classList.add('hidden');
+});
+document.getElementById('mig-cancelar').addEventListener('click', () => migrarPainel.classList.add('hidden'));
+document.getElementById('mig-motivo').addEventListener('change', sugerirDestino);
+
+function sugerirDestino() {
+  const motivo = document.getElementById('mig-motivo').value;
+  const mapa = { 'APOSENTADORIA': 'APOSENTADORIA / RESERVA', 'RESERVA/REFORMA': 'APOSENTADORIA / RESERVA', 'PENSÃO': 'PENSÃO', 'PERDA DE OBJETO': 'PERDA DE OBJETO' };
+  if (mapa[motivo]) document.getElementById('mig-destino').value = mapa[motivo];
+}
+
+document.getElementById('mig-confirmar').addEventListener('click', async () => {
+  if (!registroAtualFicha) return;
+  const body = {
+    action: 'migrar',
+    categoriaOrigem: registroAtualFicha.categoria,
+    linha: registroAtualFicha.linha,
+    categoriaDestino: document.getElementById('mig-destino').value,
+    motivo: document.getElementById('mig-motivo').value,
+    cargoAlvo: document.getElementById('mig-cargo-alvo').value,
+    dataFato: document.getElementById('mig-data-fato').value.trim(),
+    observacaoExtra: document.getElementById('mig-obs-extra').value.trim()
+  };
+  const btn = document.getElementById('mig-confirmar');
+  btn.disabled = true; btn.textContent = 'Migrando...';
+  try {
+    const resp = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+    const data = await resp.json();
+    if (data.erro) throw new Error(data.erro);
+    migResultado.classList.remove('hidden');
+    migResultado.innerHTML = '<i class="ti ti-check"></i> ' + esc(data.mensagem) + '<br>Observação registrada: <em>' + esc(data.observacaoRegistrada) + '</em>';
+  } catch (err) {
+    alert('Erro ao migrar: ' + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Confirmar migração';
+  }
+});
+
+// ---------------------------------------------------------------------
+// NAVEGAÇÃO / ETAPAS (folhas de ponto seguem locais por enquanto)
+// ---------------------------------------------------------------------
+function showView(id) {
+  ['view-search', 'view-cadastro', 'view-ficha', 'view-2', 'view-3'].forEach(v => {
+    document.getElementById(v).classList.toggle('hidden', v !== id);
+  });
+}
+
+const years = ['2026','2025','2024','2023','2022','2021','2020'];
+const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const weekdayNames = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+function closeAllDropdowns() { document.querySelectorAll('.dropdown-list').forEach(d => d.style.display = 'none'); }
+function periodKey(year, monthIdx) { return monthNames[monthIdx] + '/' + year; }
+
+function renderPontoCargos() {
+  pontoCargos.innerHTML = '';
+  state.cargos.forEach(cargo => {
+    const block = document.createElement('div');
+    block.className = 'box';
+    block.innerHTML =
+      '<p style="margin:0 0 12px; font-size:13px; font-weight:500;">' + esc(cargo.label) + '</p>' +
+      '<div class="row" style="margin-bottom:12px;">' +
+      '<div style="position:relative;"><button type="button" class="year-toggle">Ano <i class="ti ti-chevron-down"></i></button>' +
+      '<div class="dropdown-list year-list" style="display:none; position:absolute; top:38px; left:0; z-index:10; background:#FFF; border:1px solid #C9C7BC; border-radius:8px; padding:4px; min-width:100px; box-shadow:0 4px 12px rgba(0,0,0,.12);"></div></div>' +
+      '<div style="position:relative;"><button type="button" class="month-toggle" disabled>Mês <i class="ti ti-chevron-down"></i></button>' +
+      '<div class="dropdown-list month-list" style="display:none; position:absolute; top:38px; left:0; z-index:10; background:#FFF; border:1px solid #C9C7BC; border-radius:8px; padding:4px; min-width:130px; max-height:220px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,.12);"></div></div>' +
+      '</div><div class="periods-summary" style="display:flex; flex-direction:column; gap:6px; margin-bottom:8px;"></div>' +
+      '<div class="periodo-form" style="display:none;"></div>';
+    pontoCargos.appendChild(block);
+
+    let selectedYear = null;
+    const yearToggle = block.querySelector('.year-toggle'), yearList = block.querySelector('.year-list');
+    const monthToggle = block.querySelector('.month-toggle'), monthList = block.querySelector('.month-list');
+    const summary = block.querySelector('.periods-summary'), formArea = block.querySelector('.periodo-form');
+
+    years.forEach(y => {
+      const item = document.createElement('div');
+      item.textContent = y;
+      item.style.cssText = 'font-size:12.5px; padding:6px 10px; border-radius:6px; cursor:pointer;';
+      item.onmouseenter = () => item.style.background = '#F1EFE8';
+      item.onmouseleave = () => item.style.background = '';
+      item.onclick = () => {
+        selectedYear = y; yearToggle.innerHTML = y + ' <i class="ti ti-chevron-down"></i>';
+        yearList.style.display = 'none'; monthToggle.disabled = false;
+      };
+      yearList.appendChild(item);
+    });
+
+    monthNames.forEach((m, mIdx) => {
+      const item = document.createElement('div');
+      item.textContent = m;
+      item.style.cssText = 'font-size:12.5px; padding:6px 10px; border-radius:6px; cursor:pointer;';
+      item.onmouseenter = () => item.style.background = '#F1EFE8';
+      item.onmouseleave = () => item.style.background = '';
+      item.onclick = () => { if (!selectedYear) return; monthList.style.display = 'none'; abrirFormularioPeriodo(selectedYear, mIdx); };
+      monthList.appendChild(item);
+    });
+
+    function renderSummary() {
+      summary.innerHTML = '';
+      Object.keys(cargo.periods).forEach(key => {
+        const p = cargo.periods[key];
+        const diasPreenchidos = Object.keys(p.dias || {}).filter(d => p.dias[d].entrada || p.dias[d].naoTrabalhou).length;
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:12.5px; background:#F7F5F1; padding:6px 10px; border-radius:8px;';
+        row.innerHTML = '<span><i class="ti ti-calendar-check" style="color:#3B6D11;"></i> ' + key + ' <span class="muted">· ' + diasPreenchidos + ' dia(s)' + (p.filename ? ' · ' + p.filename : ' · sem folha') + '</span></span>' +
+          '<span style="display:flex; gap:10px;"><i class="ti ti-pencil edit-period" style="cursor:pointer;"></i><i class="ti ti-x remove-period" style="cursor:pointer;"></i></span>';
+        row.querySelector('.remove-period').onclick = () => { delete cargo.periods[key]; renderSummary(); };
+        row.querySelector('.edit-period').onclick = () => { const parts = key.split('/'); abrirFormularioPeriodo(parts[1], monthNames.indexOf(parts[0])); };
+        summary.appendChild(row);
+      });
+    }
+    renderSummary();
+
+    function abrirFormularioPeriodo(year, monthIdx) {
+      const key = periodKey(year, monthIdx);
+      if (!cargo.periods[key]) cargo.periods[key] = { dias: {}, filename: '' };
+      const periodo = cargo.periods[key];
+      const numDias = new Date(parseInt(year, 10), monthIdx + 1, 0).getDate();
+      let html = '<div class="box" style="background:#FCFBF8;"><p style="margin:0 0 10px; font-size:12.5px; font-weight:500; color:#1B3A5C;">Horários cumpridos · ' + key + '</p>' +
+        '<div class="row" style="align-items:center; margin-bottom:12px;"><button type="button" class="anexar-folha outline-blue"><i class="ti ti-paperclip"></i> Anexar folha de ponto</button>' +
+        '<span class="arquivo-nome muted" style="font-size:12px;">' + (periodo.filename || 'nenhum arquivo anexado') + '</span></div>' +
+        '<div style="max-height:320px; overflow-y:auto; border:1px solid #E4E0D4; border-radius:6px;"><table style="width:100%; border-collapse:collapse; font-size:12px;">' +
+        '<thead><tr style="background:#F1EFE8; text-align:left;"><th style="padding:6px 8px;">Dia</th><th style="padding:6px 8px;">Entrada</th><th style="padding:6px 8px;">Saída</th><th style="padding:6px 8px;">Não trabalhou</th></tr></thead><tbody>';
+      for (let d = 1; d <= numDias; d++) {
+        const dow = new Date(parseInt(year, 10), monthIdx, d).getDay();
+        const isWeekend = (dow === 0 || dow === 6);
+        const diaData = periodo.dias[d] || { entrada: '', saida: '', naoTrabalhou: isWeekend };
+        html += '<tr class="dia-row" data-dia="' + d + '" style="' + (isWeekend ? 'background:#FAF8F2;' : '') + '">' +
+          '<td style="padding:5px 8px;">' + String(d).padStart(2, '0') + ' · ' + weekdayNames[dow] + '</td>' +
+          '<td style="padding:5px 8px;"><input type="time" class="entrada-input" style="width:110px; padding:3px 6px; font-size:12px;" value="' + (diaData.entrada || '') + '" ' + (diaData.naoTrabalhou ? 'disabled' : '') + '></td>' +
+          '<td style="padding:5px 8px;"><input type="time" class="saida-input" style="width:110px; padding:3px 6px; font-size:12px;" value="' + (diaData.saida || '') + '" ' + (diaData.naoTrabalhou ? 'disabled' : '') + '></td>' +
+          '<td style="padding:5px 8px; text-align:center;"><input type="checkbox" class="nt-input" ' + (diaData.naoTrabalhou ? 'checked' : '') + '></td></tr>';
+      }
+      html += '</tbody></table></div><div style="display:flex; justify-content:flex-end; gap:8px; margin-top:10px;">' +
+        '<button type="button" class="cancelar-periodo">Fechar</button><button type="button" class="salvar-periodo primary">Salvar período</button></div></div>';
+      formArea.innerHTML = html; formArea.style.display = 'block';
+
+      const fileNameSpan = formArea.querySelector('.arquivo-nome');
+      formArea.querySelector('.anexar-folha').onclick = () => {
+        const input = document.createElement('input');
+        input.type = 'file'; input.accept = '.pdf,.jpg,.jpeg,.png'; input.style.display = 'none';
+        document.body.appendChild(input);
+        input.onchange = () => { const fn = input.files[0] ? input.files[0].name : ''; if (fn) { periodo.filename = fn; fileNameSpan.textContent = fn; } input.remove(); };
+        input.click();
+      };
+      formArea.querySelectorAll('.nt-input').forEach(cb => {
+        cb.onchange = () => {
+          const tr = cb.closest('.dia-row'), ei = tr.querySelector('.entrada-input'), si = tr.querySelector('.saida-input');
+          ei.disabled = si.disabled = cb.checked;
+        };
+      });
+      formArea.querySelector('.cancelar-periodo').onclick = () => { formArea.style.display = 'none'; formArea.innerHTML = ''; };
+      formArea.querySelector('.salvar-periodo').onclick = () => {
+        formArea.querySelectorAll('.dia-row').forEach(tr => {
+          const dia = tr.getAttribute('data-dia');
+          periodo.dias[dia] = { entrada: tr.querySelector('.entrada-input').value, saida: tr.querySelector('.saida-input').value, naoTrabalhou: tr.querySelector('.nt-input').checked };
+        });
+        formArea.style.display = 'none'; formArea.innerHTML = ''; renderSummary();
+      };
+    }
+
+    yearToggle.onclick = e => { e.stopPropagation(); const isOpen = yearList.style.display === 'block'; closeAllDropdowns(); yearList.style.display = isOpen ? 'none' : 'block'; };
+    monthToggle.onclick = e => { e.stopPropagation(); if (monthToggle.disabled) return; const isOpen = monthList.style.display === 'block'; closeAllDropdowns(); monthList.style.display = isOpen ? 'none' : 'block'; };
+  });
+}
+document.addEventListener('click', closeAllDropdowns);
+
+function setStep(n) {
+  const views = { 1: 'view-search', 2: 'view-2', 3: 'view-3' };
+  showView(views[n]);
+  [1, 2, 3].forEach(i => {
+    const circle = document.querySelector('[data-circle="' + i + '"]');
+    const label = document.querySelector('[data-label="' + i + '"]');
+    circle.classList.remove('active', 'done'); label.classList.remove('active');
+    circle.innerHTML = i;
+    if (i < n) { circle.classList.add('done'); circle.innerHTML = '<i class="ti ti-check"></i>'; label.classList.add('active'); }
+    else if (i === n) { circle.classList.add('active'); label.classList.add('active'); }
+  });
+  if (n === 2) renderPontoCargos();
+  if (n === 3) {
+    resumoBox.innerHTML = state.cargos.map(c => {
+      const keys = Object.keys(c.periods);
+      if (!keys.length) return '<p style="margin:0 0 8px; font-size:13px;"><strong>' + esc(c.label) + '</strong><br><span class="muted">Nenhum período preenchido.</span></p>';
+      const linhas = keys.map(k => {
+        const p = c.periods[k];
+        const diasPreenchidos = Object.keys(p.dias || {}).filter(d => p.dias[d].entrada || p.dias[d].naoTrabalhou).length;
+        return k + ' (' + diasPreenchidos + ' dias' + (p.filename ? ', folha: ' + p.filename : ', sem folha') + ')';
+      }).join('; ');
+      return '<p style="margin:0 0 8px; font-size:13px; line-height:1.6;"><strong>' + esc(c.label) + '</strong><br>' + linhas + '</p>';
+    }).join('');
+  }
+}
+
+document.getElementById('go-step3').addEventListener('click', () => setStep(3));
+document.getElementById('back-step1').addEventListener('click', () => setStep(1));
+document.getElementById('back-step2').addEventListener('click', () => setStep(2));
+document.querySelectorAll('.step-item').forEach(el => el.addEventListener('click', () => setStep(parseInt(el.getAttribute('data-step')))));
+</script>
+</body>
+</html>
