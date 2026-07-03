@@ -108,21 +108,21 @@
         <div class="grid2" style="margin-top:10px;">
           <select id="cad-ch1"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
           <select id="cad-unigep1">
-            <option>Sede</option>
-            <option>Brazlândia</option>
-            <option>Ceilândia</option>
-            <option>Gama</option>
-            <option>Guará</option>
-            <option>Núcleo Bandeirante</option>
-            <option>Paranoá</option>
-            <option>Planaltina</option>
-            <option>Plano Piloto</option>
-            <option>Recanto das Emas</option>
-            <option>Samambaia</option>
-            <option>Santa Maria</option>
-            <option>São Sebastião</option>
-            <option>Sobradinho</option>
-            <option>Taguatinga</option>
+            <option>SEDE</option>
+            <option>BRAZLÂNDIA</option>
+            <option>CEILÂNDIA</option>
+            <option>GAMA</option>
+            <option>GUARÁ</option>
+            <option>NÚCLEO BANDEIRANTE</option>
+            <option>PARANOÁ</option>
+            <option>PLANALTINA</option>
+            <option>PLANO PILOTO</option>
+            <option>RECANTO DAS EMAS</option>
+            <option>SAMAMBAIA</option>
+            <option>SANTA MARIA</option>
+            <option>SÃO SEBASTIÃO</option>
+            <option>SOBRADINHO</option>
+            <option>TAGUATINGA</option>
           </select>
         </div>
       </div>
@@ -131,9 +131,9 @@
         <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Vínculo 2 · Segundo cargo</p>
         <label>Categoria do vínculo</label>
         <select id="cad-categoria" style="margin-bottom:10px;">
-          <option value="SEDF + SEDF">Outro cargo SEEDF</option>
-          <option value="SEDF + OUTRO">Outro órgão / ente federativo</option>
-          <option value="CONTRATO TEMPORÁRIO">Contrato temporário</option>
+          <option value="SEDF + SEDF">OUTRO CARGO SEEDF</option>
+          <option value="SEDF + OUTRO">OUTRO ÓRGÃO / ENTE FEDERATIVO</option>
+          <option value="CONTRATO TEMPORÁRIO">CONTRATO TEMPORÁRIO</option>
         </select>
         <div class="grid2">
           <input id="cad-cargo2" type="text" placeholder="Cargo">
@@ -142,21 +142,21 @@
         <div class="grid2" style="margin-top:10px;">
           <select id="cad-ch2"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
           <select id="cad-unigep2" class="hidden">
-            <option>Sede</option>
-            <option>Brazlândia</option>
-            <option>Ceilândia</option>
-            <option>Gama</option>
-            <option>Guará</option>
-            <option>Núcleo Bandeirante</option>
-            <option>Paranoá</option>
-            <option>Planaltina</option>
-            <option>Plano Piloto</option>
-            <option>Recanto das Emas</option>
-            <option>Samambaia</option>
-            <option>Santa Maria</option>
-            <option>São Sebastião</option>
-            <option>Sobradinho</option>
-            <option>Taguatinga</option>
+            <option>SEDE</option>
+            <option>BRAZLÂNDIA</option>
+            <option>CEILÂNDIA</option>
+            <option>GAMA</option>
+            <option>GUARÁ</option>
+            <option>NÚCLEO BANDEIRANTE</option>
+            <option>PARANOÁ</option>
+            <option>PLANALTINA</option>
+            <option>PLANO PILOTO</option>
+            <option>RECANTO DAS EMAS</option>
+            <option>SAMAMBAIA</option>
+            <option>SANTA MARIA</option>
+            <option>SÃO SEBASTIÃO</option>
+            <option>SOBRADINHO</option>
+            <option>TAGUATINGA</option>
           </select>
           <input id="cad-orgao2" type="text" placeholder="Órgão / entidade">
         </div>
@@ -183,10 +183,10 @@
         <div class="grid2" style="margin-bottom:10px;">
           <div><label>Motivo</label>
             <select id="mig-motivo">
-              <option value="APOSENTADORIA">Aposentadoria</option>
-              <option value="RESERVA/REFORMA">Reserva/Reforma</option>
-              <option value="PENSÃO">Pensão</option>
-              <option value="PERDA DE OBJETO">Perda de objeto</option>
+              <option value="APOSENTADORIA">APOSENTADORIA</option>
+              <option value="RESERVA/REFORMA">RESERVA/REFORMA</option>
+              <option value="PENSÃO">PENSÃO</option>
+              <option value="PERDA DE OBJETO">PERDA DE OBJETO</option>
             </select>
           </div>
           <div><label>Categoria de destino</label>
@@ -271,6 +271,18 @@ const migrarPainel = document.getElementById('migrar-painel');
 const migResultado = document.getElementById('mig-resultado');
 
 function esc(s) { return (s === undefined || s === null || s === '') ? '—' : String(s); }
+
+// ---------------------------------------------------------------------
+// CAIXA ALTA AUTOMÁTICA em todos os campos de texto (busca, cadastro, migração)
+// ---------------------------------------------------------------------
+function aplicarCaixaAlta(el) {
+  el.addEventListener('input', () => {
+    const start = el.selectionStart, end = el.selectionEnd;
+    el.value = el.value.toUpperCase();
+    el.setSelectionRange(start, end);
+  });
+}
+document.querySelectorAll('input[type="text"]').forEach(aplicarCaixaAlta);
 
 const placeholders = { nome: 'Nome completo do servidor', matricula: 'Ex.: 2003.227-7 ou 20032277', processo: 'Ex.: 00080-00086543/2026-65' };
 const hints = { nome: 'Digite um nome e clique em Buscar.', matricula: 'Funciona com ou sem pontuação.', processo: 'Digite o número do processo.' };
@@ -410,7 +422,8 @@ document.getElementById('cad-salvar').addEventListener('click', async () => {
     unigep1: document.getElementById('cad-unigep1').value,
     cargo2: document.getElementById('cad-cargo2').value,
     mat2: document.getElementById('cad-mat2').value,
-    orgao2: cadCategoria.value === 'SEDF + SEDF' ? cadUnigep2.value : cadOrgao2.value,
+    unigep2: cadCategoria.value === 'SEDF + SEDF' ? cadUnigep2.value : '',
+    orgao2: cadCategoria.value !== 'SEDF + SEDF' ? cadOrgao2.value : '',
     ch2: document.getElementById('cad-ch2').value
   };
   const btn = document.getElementById('cad-salvar');
