@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Análise de Acumulação de Cargos · CPAC/SEEDF</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   * { box-sizing: border-box; }
   body { font-family: -apple-system, 'Inter', Arial, sans-serif; background: #F1EFE8; margin: 0; padding: 24px; color: #2C2C2A; }
@@ -51,15 +52,25 @@
 </head>
 <body>
 
-<div class="app">
+<div id="login-overlay" style="position:fixed; inset:0; background:#1B3A5C; display:flex; align-items:center; justify-content:center; z-index:1000;">
+  <div style="background:#FFFFFF; border-radius:12px; padding:36px 32px; max-width:380px; width:90%; text-align:center;">
+    <p style="margin:0 0 4px; font-family:Georgia,serif; font-size:18px; color:#1B3A5C;">CPAC · Acumulação de Cargos</p>
+    <p style="margin:0 0 22px; font-size:12.5px; color:#6B6A62;">Entre com sua conta institucional para acessar o sistema.</p>
+    <div id="g_id_signin_container" style="display:flex; justify-content:center;"></div>
+    <p id="login-erro" class="hidden" style="margin:16px 0 0; font-size:12.5px; color:#A33; background:#FBEAEA; border-radius:6px; padding:10px 12px;"></p>
+  </div>
+</div>
+
+<div class="app hidden" id="app-container">
   <div class="header">
     <div>
       <p class="title">Análise de acumulação de cargos</p>
       <p class="subtitle">SEEDF · Comissão Permanente de Acumulação de Cargos</p>
     </div>
     <div style="text-align:right; border-left:1px solid #3A567A; padding-left:16px;">
-      <p style="margin:0; font-size:10.5px; color:#8FA3B8; text-transform:uppercase;">Fonte de dados</p>
-      <p style="margin:2px 0 0; font-size:13px; color:#E8C77A;">Planilha CPAC (ao vivo)</p>
+      <p style="margin:0; font-size:10.5px; color:#8FA3B8; text-transform:uppercase;">Conectado como</p>
+      <p id="usuario-logado" style="margin:2px 0 0; font-size:12.5px; color:#E8C77A;">—</p>
+      <p id="logout-link" style="margin:4px 0 0; font-size:11px; color:#B8C4D1; cursor:pointer; text-decoration:underline;">Sair</p>
     </div>
   </div>
 
@@ -269,6 +280,73 @@ const resumoBox = document.getElementById('resumo-box');
 const fichaConteudo = document.getElementById('ficha-conteudo');
 const migrarPainel = document.getElementById('migrar-painel');
 const migResultado = document.getElementById('mig-resultado');
+
+// =====================================================================
+// LOGIN COM GOOGLE — troque pelo Client ID gerado no Google Cloud Console
+// =====================================================================
+const GOOGLE_CLIENT_ID = '392648516639-3vij1mqsfjld31otsahaols1325gp7mh.apps.googleusercontent.com';
+
+// Lista de e-mails autorizados a acessar o sistema (qualquer conta Google, desde que esteja aqui).
+// Adicione/remova e-mails conforme necessário — não precisa ser do mesmo domínio.
+const EMAILS_AUTORIZADOS = [
+  'denis.cursodireito@gmail.com',
+  'cpac.sugep@edu.se.df.gov.br',
+  'jeesmartins@gmail.com',
+  'dilceiatorres@gmail.com'
+];
+
+let currentUser = null; // { nome, email }
+
+function decodeJwt(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
+    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+  return JSON.parse(jsonPayload);
+}
+
+function handleCredentialResponse(response) {
+  const payload = decodeJwt(response.credential);
+  const email = (payload.email || '').toLowerCase();
+  const nome = payload.name || email;
+  const loginErro = document.getElementById('login-erro');
+
+  const autorizado = EMAILS_AUTORIZADOS.some(e => e.toLowerCase() === email);
+  if (!autorizado) {
+    loginErro.textContent = 'Este e-mail (' + email + ') não está autorizado a acessar o sistema. Peça para o administrador adicionar seu e-mail à lista de acesso.';
+    loginErro.classList.remove('hidden');
+    return;
+  }
+
+  currentUser = { nome, email };
+  sessionStorage.setItem('cpac_user', JSON.stringify(currentUser));
+  entrarNoSistema();
+}
+
+function entrarNoSistema() {
+  document.getElementById('login-overlay').classList.add('hidden');
+  document.getElementById('app-container').classList.remove('hidden');
+  document.getElementById('usuario-logado').textContent = currentUser.nome + ' (' + currentUser.email + ')';
+}
+
+document.getElementById('logout-link').addEventListener('click', () => {
+  sessionStorage.removeItem('cpac_user');
+  currentUser = null;
+  location.reload();
+});
+
+window.addEventListener('load', () => {
+  const salvo = sessionStorage.getItem('cpac_user');
+  if (salvo) {
+    currentUser = JSON.parse(salvo);
+    entrarNoSistema();
+    return;
+  }
+  if (typeof google !== 'undefined' && google.accounts) {
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
+    google.accounts.id.renderButton(document.getElementById('g_id_signin_container'), { theme: 'outline', size: 'large', text: 'signin_with' });
+  }
+});
 
 function esc(s) { return (s === undefined || s === null || s === '') ? '—' : String(s); }
 
@@ -503,6 +581,10 @@ function sugerirDestino() {
 
 document.getElementById('mig-confirmar').addEventListener('click', async () => {
   if (!registroAtualFicha) return;
+  const obsBase = document.getElementById('mig-obs-extra').value.trim();
+  const obsComUsuario = obsBase
+    ? obsBase + ' | Registrado por: ' + (currentUser ? currentUser.nome : 'desconhecido')
+    : 'Registrado por: ' + (currentUser ? currentUser.nome : 'desconhecido');
   const body = {
     action: 'migrar',
     categoriaOrigem: registroAtualFicha.categoria,
@@ -511,7 +593,7 @@ document.getElementById('mig-confirmar').addEventListener('click', async () => {
     motivo: document.getElementById('mig-motivo').value,
     cargoAlvo: document.getElementById('mig-cargo-alvo').value,
     dataFato: document.getElementById('mig-data-fato').value.trim(),
-    observacaoExtra: document.getElementById('mig-obs-extra').value.trim()
+    observacaoExtra: obsComUsuario
   };
   const btn = document.getElementById('mig-confirmar');
   btn.disabled = true; btn.textContent = 'Migrando...';
