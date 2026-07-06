@@ -74,6 +74,12 @@
     </div>
   </div>
 
+  <div class="row" style="padding:14px 28px 0; gap:8px; background:#F7F5F1; border:1px solid #E4E0D4; border-bottom:none;">
+    <button type="button" id="nav-cadastro" class="primary">Cadastro / Busca</button>
+    <button type="button" id="nav-relatorios"><i class="ti ti-alert-triangle"></i> Relatórios</button>
+  </div>
+
+  <div id="area-cadastro">
   <div class="steps">
     <div class="step-item" data-step="1"><div class="step-circle active" data-circle="1">1</div><span class="step-label active" data-label="1">Servidor e cargos</span></div>
     <div class="step-line"></div>
@@ -299,6 +305,26 @@
     </div>
 
   </div>
+  </div> <!-- fecha area-cadastro -->
+
+  <div id="area-relatorios" class="hidden">
+    <div class="card" style="border-radius:0 0 12px 12px;">
+      <h2 class="section-title">Relatório de acompanhamento anual</h2>
+      <p class="section-sub">Processos das categorias SEDF + SEDF e SEDF + OUTRO que estão atrasados ou perto de vencer o prazo legal de reavaliação anual da compatibilidade.</p>
+      <div class="row" style="margin-bottom:14px;">
+        <button type="button" id="rel-gerar" class="primary"><i class="ti ti-refresh"></i> Gerar relatório</button>
+        <select id="rel-filtro">
+          <option value="todos">Todos (atrasados + vencendo)</option>
+          <option value="ATRASADO">Só atrasados</option>
+          <option value="VENCENDO EM BREVE">Só vencendo em breve</option>
+        </select>
+      </div>
+      <div id="rel-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Consultando planilha...</div>
+      <div id="rel-resumo"></div>
+      <div id="rel-tabela"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -920,6 +946,97 @@ document.getElementById('go-step3').addEventListener('click', () => setStep(3));
 document.getElementById('back-step1').addEventListener('click', () => setStep(1));
 document.getElementById('back-step2').addEventListener('click', () => setStep(2));
 document.querySelectorAll('.step-item').forEach(el => el.addEventListener('click', () => setStep(parseInt(el.getAttribute('data-step')))));
+
+// ---------------------------------------------------------------------
+// NAVEGAÇÃO ENTRE ÁREAS (Cadastro/Busca vs. Relatórios)
+// ---------------------------------------------------------------------
+const areaCadastro = document.getElementById('area-cadastro');
+const areaRelatorios = document.getElementById('area-relatorios');
+const navCadastro = document.getElementById('nav-cadastro');
+const navRelatorios = document.getElementById('nav-relatorios');
+
+navCadastro.addEventListener('click', () => {
+  areaCadastro.classList.remove('hidden');
+  areaRelatorios.classList.add('hidden');
+  navCadastro.classList.add('primary');
+  navRelatorios.classList.remove('primary');
+});
+navRelatorios.addEventListener('click', () => {
+  areaCadastro.classList.add('hidden');
+  areaRelatorios.classList.remove('hidden');
+  navRelatorios.classList.add('primary');
+  navCadastro.classList.remove('primary');
+});
+
+// ---------------------------------------------------------------------
+// RELATÓRIO DE ACOMPANHAMENTO ANUAL
+// ---------------------------------------------------------------------
+let ultimoRelatorio = [];
+
+async function gerarRelatorio() {
+  const relLoading = document.getElementById('rel-loading');
+  const relResumo = document.getElementById('rel-resumo');
+  const relTabela = document.getElementById('rel-tabela');
+  relLoading.classList.remove('hidden');
+  relResumo.innerHTML = '';
+  relTabela.innerHTML = '';
+  try {
+    const resp = await fetch(API_URL + '?action=relatorioAtrasados');
+    const data = await resp.json();
+    if (data.erro) throw new Error(data.erro);
+    ultimoRelatorio = data.resultados || [];
+    renderRelatorio();
+  } catch (err) {
+    relTabela.innerHTML = '<div class="box" style="border-color:#D98C8C;"><p style="margin:0; font-size:13px; color:#A33;">Erro ao gerar relatório: ' + esc(err.message) + '</p></div>';
+  } finally {
+    relLoading.classList.add('hidden');
+  }
+}
+
+function renderRelatorio() {
+  const filtro = document.getElementById('rel-filtro').value;
+  const relResumo = document.getElementById('rel-resumo');
+  const relTabela = document.getElementById('rel-tabela');
+
+  const lista = filtro === 'todos' ? ultimoRelatorio : ultimoRelatorio.filter(r => r.situacao === filtro);
+  const totalAtrasados = ultimoRelatorio.filter(r => r.situacao === 'ATRASADO').length;
+  const totalVencendo = ultimoRelatorio.filter(r => r.situacao === 'VENCENDO EM BREVE').length;
+
+  relResumo.innerHTML =
+    '<div class="row" style="margin-bottom:16px; gap:12px;">' +
+    '<div class="box" style="flex:1; text-align:center; border-color:#D98C8C; background:#FBEAEA;"><p style="margin:0; font-size:22px; font-weight:600; color:#A33;">' + totalAtrasados + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#8A3A3A;">Atrasados</p></div>' +
+    '<div class="box" style="flex:1; text-align:center; border-color:#E8C77A; background:#FAF3E2;"><p style="margin:0; font-size:22px; font-weight:600; color:#85560B;">' + totalVencendo + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#85560B;">Vencendo em breve</p></div>' +
+    '</div>';
+
+  if (!lista.length) {
+    relTabela.innerHTML = '<div class="box" style="text-align:center;"><p class="muted" style="margin:0; font-size:13px;">Nenhum processo nessa condição. 🎉</p></div>';
+    return;
+  }
+
+  let html = '<div style="max-height:520px; overflow-y:auto; border:1px solid #E4E0D4; border-radius:8px;"><table style="width:100%; border-collapse:collapse; font-size:12.5px;">' +
+    '<thead style="position:sticky; top:0; background:#F1EFE8;"><tr style="text-align:left;">' +
+    '<th style="padding:8px 10px;">Nome</th><th style="padding:8px 10px;">Processo</th><th style="padding:8px 10px;">Categoria</th>' +
+    '<th style="padding:8px 10px;">Vencimento</th><th style="padding:8px 10px;">Situação</th></tr></thead><tbody>';
+
+  lista.forEach(r => {
+    const atrasado = r.situacao === 'ATRASADO';
+    const corTexto = atrasado ? '#A33' : '#85560B';
+    const corFundo = atrasado ? '#FBEAEA' : '#FAF3E2';
+    const diasTexto = atrasado ? (r.diasAtraso + ' dia(s) atrasado') : (Math.abs(r.diasAtraso) + ' dia(s) restante(s)');
+    html += '<tr style="border-top:1px solid #E4E0D4;">' +
+      '<td style="padding:7px 10px;">' + esc(r.nome) + '</td>' +
+      '<td style="padding:7px 10px;">' + esc(r.processo) + '</td>' +
+      '<td style="padding:7px 10px;">' + esc(r.categoria) + '</td>' +
+      '<td style="padding:7px 10px;">' + esc(r.dataAcompanhamento) + '</td>' +
+      '<td style="padding:7px 10px;"><span style="background:' + corFundo + '; color:' + corTexto + '; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:500;">' + r.situacao + ' · ' + diasTexto + '</span></td>' +
+      '</tr>';
+  });
+  html += '</tbody></table></div>';
+  relTabela.innerHTML = html;
+}
+
+document.getElementById('rel-gerar').addEventListener('click', gerarRelatorio);
+document.getElementById('rel-filtro').addEventListener('change', renderRelatorio);
 </script>
 </body>
 </html>
