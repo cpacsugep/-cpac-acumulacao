@@ -114,7 +114,7 @@
       <div class="box">
         <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Vínculo 1 · SEDF</p>
         <div class="grid2">
-          <input id="cad-cargo1" type="text" placeholder="Cargo">
+          <input id="cad-cargo1" type="text" placeholder="Cargo (ex.: Professor, Orientador Educacional, Analista, Gestor...)">
           <input id="cad-mat1" type="text" placeholder="Matrícula">
         </div>
         <div class="grid2" style="margin-top:10px;">
@@ -177,10 +177,6 @@
         </div>
 
         <div id="campos-contrato-temp" class="hidden">
-          <p style="margin:0 0 10px; font-size:11.5px; color:#8A897F; line-height:1.5;">
-            Na aba de Contrato Temporário, o cargo efetivo (Vínculo 1, informado acima) é mencionado apenas como referência,
-            e pode ser em qualquer órgão ou ente da federação — não necessariamente a SEEDF.
-          </p>
           <div class="grid2">
             <input id="cad-ano-temp" type="text" placeholder="Ano do contrato (ex.: 2026)">
             <input id="cad-mat-temp" type="text" placeholder="Matrícula do contrato temporário">
@@ -208,17 +204,21 @@
 
       <div id="editar-painel" class="hidden box" style="margin-bottom:18px;">
         <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Alterar dados do processo</p>
-        <div class="grid2" style="margin-bottom:10px;">
-          <input id="edit-cargo1" type="text" placeholder="Cargo (Vínculo 1)">
-          <input id="edit-mat1" type="text" placeholder="Matrícula (Vínculo 1)">
+        <div class="grid2" style="margin-bottom:4px;">
+          <label style="margin:0;">Vínculo 1</label>
+          <label style="margin:0;">Vínculo 2</label>
         </div>
         <div class="grid2" style="margin-bottom:10px;">
-          <input id="edit-cargo2" type="text" placeholder="Cargo (Vínculo 2)">
-          <input id="edit-mat2" type="text" placeholder="Matrícula (Vínculo 2)">
+          <input id="edit-cargo1" type="text" placeholder="Cargo">
+          <input id="edit-cargo2" type="text" placeholder="Cargo">
         </div>
         <div class="grid2" style="margin-bottom:10px;">
-          <input id="edit-ch1" type="text" placeholder="CH Vínculo 1">
-          <input id="edit-ch2" type="text" placeholder="CH Vínculo 2">
+          <input id="edit-mat1" type="text" placeholder="Matrícula">
+          <input id="edit-mat2" type="text" placeholder="Matrícula">
+        </div>
+        <div class="grid2" style="margin-bottom:10px;">
+          <input id="edit-ch1" type="text" placeholder="Carga horária">
+          <input id="edit-ch2" type="text" placeholder="Carga horária">
         </div>
         <div style="margin-bottom:10px;"><input id="edit-orgao2" type="text" placeholder="Órgão/entidade ou Unigep (Vínculo 2)"></div>
         <div style="margin-bottom:12px;"><label>Último parecer emitido</label><input id="edit-parecer" type="text"></div>
@@ -493,7 +493,20 @@ document.getElementById('search-btn').addEventListener('click', async () => {
 });
 searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('search-btn').click(); });
 
+function resetFormularioCadastro() {
+  ['cad-nome', 'cad-processo', 'cad-parecer', 'cad-cargo1', 'cad-mat1',
+   'cad-cargo2', 'cad-mat2', 'cad-orgao2', 'cad-ano-temp', 'cad-mat-temp', 'cad-orgao-temp']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('cad-ch1').selectedIndex = 0;
+  document.getElementById('cad-ch2').selectedIndex = 0;
+  document.getElementById('cad-unigep1').selectedIndex = 0;
+  document.getElementById('cad-unigep2').selectedIndex = 0;
+  document.getElementById('cad-categoria').selectedIndex = 0;
+  atualizarCampoVinculo2();
+}
+
 document.getElementById('go-cadastro-always').addEventListener('click', () => {
+  resetFormularioCadastro();
   if (searchType === 'nome') document.getElementById('cad-nome').value = searchInput.value.trim();
   if (searchType === 'matricula') document.getElementById('cad-mat1').value = searchInput.value.trim();
   if (searchType === 'processo') document.getElementById('cad-processo').value = searchInput.value.trim();
