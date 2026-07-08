@@ -117,7 +117,16 @@
       <div style="margin-bottom:18px;"><label>Número do processo</label><input id="cad-processo" type="text" placeholder="00080-00000000/2026-00"></div>
       <div style="margin-bottom:18px;"><label>Último parecer emitido (se já houver)</label><input id="cad-parecer" type="text" placeholder="Ex.: PARECER SEI-GDF N.º 000/2026"></div>
 
-      <div class="box">
+      <div style="margin-bottom:18px;">
+        <label>Categoria da acumulação</label>
+        <select id="cad-categoria">
+          <option value="SEDF + SEDF">SEDF + SEDF (OUTRO CARGO SEEDF)</option>
+          <option value="SEDF + OUTRO">SEDF + OUTRO ÓRGÃO / ENTE FEDERATIVO</option>
+          <option value="CONTRATO TEMPORÁRIO">CONTRATO TEMPORÁRIO</option>
+        </select>
+      </div>
+
+      <div id="bloco-vinculo1" class="box">
         <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Vínculo 1 · SEDF</p>
         <div class="grid2">
           <input id="cad-cargo1" type="text" placeholder="Cargo (ex.: Professor, Orientador Educacional, Analista, Gestor...)">
@@ -145,49 +154,50 @@
         </div>
       </div>
 
-      <div class="box">
+      <div id="bloco-vinculo2-normal" class="box">
         <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Vínculo 2 · Segundo cargo</p>
-        <label>Categoria do vínculo</label>
-        <select id="cad-categoria" style="margin-bottom:10px;">
-          <option value="SEDF + SEDF">OUTRO CARGO SEEDF</option>
-          <option value="SEDF + OUTRO">OUTRO ÓRGÃO / ENTE FEDERATIVO</option>
-          <option value="CONTRATO TEMPORÁRIO">CONTRATO TEMPORÁRIO</option>
-        </select>
-
-        <div id="campos-vinculo2-normal">
-          <div class="grid2">
-            <input id="cad-cargo2" type="text" placeholder="Cargo">
-            <input id="cad-mat2" type="text" placeholder="Matrícula">
-          </div>
-          <div class="grid2" style="margin-top:10px;">
-            <select id="cad-ch2"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
-            <select id="cad-unigep2" class="hidden">
-              <option>SEDE</option>
-              <option>BRAZLÂNDIA</option>
-              <option>CEILÂNDIA</option>
-              <option>GAMA</option>
-              <option>GUARÁ</option>
-              <option>NÚCLEO BANDEIRANTE</option>
-              <option>PARANOÁ</option>
-              <option>PLANALTINA</option>
-              <option>PLANO PILOTO</option>
-              <option>RECANTO DAS EMAS</option>
-              <option>SAMAMBAIA</option>
-              <option>SANTA MARIA</option>
-              <option>SÃO SEBASTIÃO</option>
-              <option>SOBRADINHO</option>
-              <option>TAGUATINGA</option>
-            </select>
-            <input id="cad-orgao2" type="text" placeholder="Órgão / entidade">
-          </div>
+        <div class="grid2">
+          <input id="cad-cargo2" type="text" placeholder="Cargo">
+          <input id="cad-mat2" type="text" placeholder="Matrícula">
         </div>
+        <div class="grid2" style="margin-top:10px;">
+          <select id="cad-ch2"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
+          <select id="cad-unigep2" class="hidden">
+            <option>SEDE</option>
+            <option>BRAZLÂNDIA</option>
+            <option>CEILÂNDIA</option>
+            <option>GAMA</option>
+            <option>GUARÁ</option>
+            <option>NÚCLEO BANDEIRANTE</option>
+            <option>PARANOÁ</option>
+            <option>PLANALTINA</option>
+            <option>PLANO PILOTO</option>
+            <option>RECANTO DAS EMAS</option>
+            <option>SAMAMBAIA</option>
+            <option>SANTA MARIA</option>
+            <option>SÃO SEBASTIÃO</option>
+            <option>SOBRADINHO</option>
+            <option>TAGUATINGA</option>
+          </select>
+          <input id="cad-orgao2" type="text" placeholder="Órgão / entidade">
+        </div>
+      </div>
 
-        <div id="campos-contrato-temp" class="hidden">
+      <div id="bloco-contrato-temp" class="hidden">
+        <div class="box">
+          <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Vínculo 1 · Contrato Temporário (SEEDF)</p>
           <div class="grid2">
             <input id="cad-ano-temp" type="text" placeholder="Ano do contrato (ex.: 2026)">
             <input id="cad-mat-temp" type="text" placeholder="Matrícula do contrato temporário">
           </div>
-          <div style="margin-top:10px;"><input id="cad-orgao-temp" type="text" placeholder="Órgão/ente do cargo efetivo (Vínculo 1)"></div>
+        </div>
+        <div class="box">
+          <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Vínculo 2 · Outro vínculo</p>
+          <p style="margin:0 0 10px; font-size:11.5px; color:#8A897F; line-height:1.5;">Pode ser um cargo efetivo na própria SEEDF, um vínculo efetivo em outro órgão/ente, ou outro contrato temporário.</p>
+          <div class="grid2">
+            <input id="cad-cargo-outro-temp" type="text" placeholder="Cargo (ex.: Professor efetivo, Técnico, etc.)">
+            <input id="cad-orgao-outro-temp" type="text" placeholder="Órgão/entidade (ex.: SEEDF, outro órgão...)">
+          </div>
         </div>
       </div>
 
@@ -521,7 +531,8 @@ searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.g
 
 function resetFormularioCadastro() {
   ['cad-nome', 'cad-processo', 'cad-parecer', 'cad-cargo1', 'cad-mat1',
-   'cad-cargo2', 'cad-mat2', 'cad-orgao2', 'cad-ano-temp', 'cad-mat-temp', 'cad-orgao-temp']
+   'cad-cargo2', 'cad-mat2', 'cad-orgao2', 'cad-ano-temp', 'cad-mat-temp',
+   'cad-cargo-outro-temp', 'cad-orgao-outro-temp']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('cad-ch1').selectedIndex = 0;
   document.getElementById('cad-ch2').selectedIndex = 0;
@@ -547,19 +558,22 @@ document.getElementById('cad-cancel').addEventListener('click', () => showView('
 const cadCategoria = document.getElementById('cad-categoria');
 const cadUnigep2 = document.getElementById('cad-unigep2');
 const cadOrgao2 = document.getElementById('cad-orgao2');
-const camposVinculo2Normal = document.getElementById('campos-vinculo2-normal');
-const camposContratoTemp = document.getElementById('campos-contrato-temp');
+const blocoVinculo1 = document.getElementById('bloco-vinculo1');
+const blocoVinculo2Normal = document.getElementById('bloco-vinculo2-normal');
+const blocoContratoTemp = document.getElementById('bloco-contrato-temp');
 
 function atualizarCampoVinculo2() {
   const val = cadCategoria.value;
 
   if (val === 'CONTRATO TEMPORÁRIO') {
-    camposVinculo2Normal.classList.add('hidden');
-    camposContratoTemp.classList.remove('hidden');
+    blocoVinculo1.classList.add('hidden');
+    blocoVinculo2Normal.classList.add('hidden');
+    blocoContratoTemp.classList.remove('hidden');
     return;
   }
-  camposVinculo2Normal.classList.remove('hidden');
-  camposContratoTemp.classList.add('hidden');
+  blocoVinculo1.classList.remove('hidden');
+  blocoVinculo2Normal.classList.remove('hidden');
+  blocoContratoTemp.classList.add('hidden');
 
   if (val === 'SEDF + SEDF') {
     cadUnigep2.classList.remove('hidden');
@@ -580,18 +594,19 @@ document.getElementById('cad-salvar').addEventListener('click', async () => {
   let body;
 
   if (categoria === 'CONTRATO TEMPORÁRIO') {
-    // Particularidade da aba Contrato Temporário: "mat1" nesta aba é a matrícula
-    // do PRÓPRIO contrato temporário (não a do cargo efetivo). O cargo efetivo
-    // (Vínculo 1, digitado acima) entra apenas como referência textual em
-    // cargo2/orgao2 — podendo ser em qualquer órgão/ente, não só a SEEDF.
+    // Vínculo 1 nesta categoria é sempre o próprio contrato temporário na SEEDF —
+    // não usa os campos genéricos de cargo/CH/Unigep das outras categorias.
+    // "mat1" na aba CONTRATO TEMPORÁRIO é a matrícula do contrato temporário.
+    // cargo2/orgao2 representam o OUTRO vínculo (que pode ser efetivo na SEEDF,
+    // efetivo em outro órgão/ente, ou outro contrato temporário).
     body = {
       categoria: categoria,
       processo: document.getElementById('cad-processo').value,
       nome: document.getElementById('cad-nome').value,
       ano: document.getElementById('cad-ano-temp').value,
       mat1: document.getElementById('cad-mat-temp').value,
-      cargo2: document.getElementById('cad-cargo1').value,
-      orgao2: document.getElementById('cad-orgao-temp').value,
+      cargo2: document.getElementById('cad-cargo-outro-temp').value,
+      orgao2: document.getElementById('cad-orgao-outro-temp').value,
       parecer: parecer
     };
   } else {
