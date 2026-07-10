@@ -94,17 +94,12 @@
     <div id="view-search">
       <h2 class="section-title">Buscar servidor</h2>
       <p class="section-sub">Busca em tempo real na planilha de controle da CPAC.</p>
-      <div class="row" style="margin-bottom:10px;">
-        <button type="button" class="search-type-btn primary" data-type="nome">Nome</button>
-        <button type="button" class="search-type-btn" data-type="matricula">Matrícula</button>
-        <button type="button" class="search-type-btn" data-type="processo">Número do processo</button>
-      </div>
       <div class="row" style="margin-bottom:8px;">
-        <input id="search-input" type="text" placeholder="Nome completo do servidor" style="flex:1;">
+        <input id="search-input" type="text" placeholder="Nome, matrícula ou número do processo" style="flex:1;">
         <button type="button" id="search-btn" class="primary"><i class="ti ti-search"></i> Buscar</button>
         <button type="button" id="go-cadastro-always" class="outline-blue"><i class="ti ti-plus"></i> Cadastrar acumulação</button>
       </div>
-      <p id="search-hint" style="font-size:11.5px; color:#8A897F; margin:0 0 18px;">Digite um nome e clique em Buscar.</p>
+      <p id="search-hint" style="font-size:11.5px; color:#8A897F; margin:0 0 18px;">Digite qualquer parte do nome, a matrícula (com ou sem pontuação) ou o número do processo — a busca reconhece automaticamente.</p>
       <div id="loading-indicator" class="hidden">Buscando na planilha...</div>
       <div id="search-result"></div>
     </div>
@@ -123,6 +118,9 @@
           <option value="SEDF + SEDF">SEDF + SEDF (OUTRO CARGO SEEDF)</option>
           <option value="SEDF + OUTRO">SEDF + OUTRO ÓRGÃO / ENTE FEDERATIVO</option>
           <option value="CONTRATO TEMPORÁRIO">CONTRATO TEMPORÁRIO</option>
+          <option value="APOSENTADORIA / RESERVA">APOSENTADORIA / RESERVA</option>
+          <option value="PENSÃO">PENSÃO</option>
+          <option value="PERDA DE OBJETO">PERDA DE OBJETO</option>
         </select>
       </div>
 
@@ -198,6 +196,38 @@
             <input id="cad-cargo-outro-temp" type="text" placeholder="Cargo (ex.: Professor efetivo, Técnico, etc.)">
             <input id="cad-orgao-outro-temp" type="text" placeholder="Órgão/entidade (ex.: SEEDF, outro órgão...)">
           </div>
+        </div>
+      </div>
+
+      <div id="bloco-encerrado" class="hidden">
+        <p style="margin:0 0 10px; font-size:11.5px; color:#8A897F; line-height:1.5;">
+          Use esta seção para cadastrar diretamente um caso já concluído (aposentadoria, pensão ou perda de objeto),
+          quando a situação já é conhecida desde o início — sem precisar passar primeiro por outra categoria e depois migrar.
+        </p>
+        <div class="box">
+          <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Vínculo 1</p>
+          <div class="grid2">
+            <input id="cad-cargo1-enc" type="text" placeholder="Cargo">
+            <input id="cad-mat1-enc" type="text" placeholder="Matrícula">
+          </div>
+          <div style="margin-top:10px;">
+            <select id="cad-ch1-enc"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
+          </div>
+        </div>
+        <div class="box">
+          <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Vínculo 2</p>
+          <div class="grid2">
+            <input id="cad-cargo2-enc" type="text" placeholder="Cargo">
+            <input id="cad-mat2-enc" type="text" placeholder="Matrícula">
+          </div>
+          <div class="grid2" style="margin-top:10px;">
+            <select id="cad-ch2-enc"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
+            <input id="cad-orgao2-enc" type="text" placeholder="Órgão / entidade">
+          </div>
+        </div>
+        <div class="box">
+          <label>Observação (ex.: motivo, data, órgão pagador da pensão, etc.)</label>
+          <input id="cad-observacao-enc" type="text">
         </div>
       </div>
 
@@ -332,6 +362,15 @@
       <div id="rel-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Consultando planilha...</div>
       <div id="rel-resumo"></div>
       <div id="rel-tabela"></div>
+
+      <div class="box" style="margin-top:24px;">
+        <p style="margin:0 0 4px; font-size:13px; font-weight:500; color:#1B3A5C;">Contagem de processos catalogados</p>
+        <p style="margin:0 0 12px; font-size:11.5px; color:#8A897F;">Selecione as categorias que deseja somar. Processos duplicados (mesmo número em mais de uma categoria) são contados uma única vez.</p>
+        <div id="cont-checkboxes" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;"></div>
+        <button type="button" id="cont-gerar" class="primary"><i class="ti ti-calculator"></i> Contar processos</button>
+        <div id="cont-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Contando...</div>
+        <div id="cont-resultado" style="margin-top:14px;"></div>
+      </div>
     </div>
   </div>
 
@@ -344,12 +383,10 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbycV6PV1dppAc6pVT4h3GM06_5KJhZQm6tOg3xF__cig5UsWImi2858_1is9S6ZYEQjaw/exec';
 
 let state = { cargos: [], nome: '' };
-let searchType = 'nome';
 let registroAtualFicha = null;
 
 const searchInput = document.getElementById('search-input');
 const searchResult = document.getElementById('search-result');
-const searchHint = document.getElementById('search-hint');
 const loadingIndicator = document.getElementById('loading-indicator');
 const pontoCargos = document.getElementById('ponto-cargos');
 const resumoBox = document.getElementById('resumo-box');
@@ -438,25 +475,11 @@ function aplicarCaixaAlta(el) {
 }
 document.querySelectorAll('input[type="text"]').forEach(aplicarCaixaAlta);
 
-const placeholders = { nome: 'Nome completo do servidor', matricula: 'Ex.: 2003.227-7 ou 20032277', processo: 'Ex.: 00080-00086543/2026-65' };
-const hints = { nome: 'Digite um nome e clique em Buscar.', matricula: 'Funciona com ou sem pontuação.', processo: 'Digite o número do processo.' };
-
-document.querySelectorAll('.search-type-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    searchType = btn.getAttribute('data-type');
-    document.querySelectorAll('.search-type-btn').forEach(b => b.classList.toggle('primary', b === btn));
-    searchInput.placeholder = placeholders[searchType];
-    searchHint.textContent = hints[searchType];
-    searchInput.value = '';
-    searchResult.innerHTML = '';
-  });
-});
-
 // ---------------------------------------------------------------------
-// BUSCA REAL (fetch GET na API)
+// BUSCA REAL (fetch GET na API) — combinada: nome, matrícula e processo de uma vez
 // ---------------------------------------------------------------------
-async function buscarNaAPI(tipo, termo) {
-  const url = API_URL + '?type=' + encodeURIComponent(tipo) + '&query=' + encodeURIComponent(termo);
+async function buscarNaAPI(termo) {
+  const url = API_URL + '?type=todos&query=' + encodeURIComponent(termo);
   const resp = await fetch(url);
   const data = await resp.json();
   if (data.erro) throw new Error(data.erro);
@@ -519,7 +542,7 @@ document.getElementById('search-btn').addEventListener('click', async () => {
   loadingIndicator.classList.remove('hidden');
   searchResult.innerHTML = '';
   try {
-    const records = await buscarNaAPI(searchType, value);
+    const records = await buscarNaAPI(value);
     renderSearchResult(records, value);
   } catch (err) {
     searchResult.innerHTML = '<div class="box" style="text-align:center; border-color:#D98C8C;"><p style="margin:0; font-size:13px; color:#A33;">Erro ao buscar: ' + esc(err.message) + '</p></div>';
@@ -532,10 +555,14 @@ searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.g
 function resetFormularioCadastro() {
   ['cad-nome', 'cad-processo', 'cad-parecer', 'cad-cargo1', 'cad-mat1',
    'cad-cargo2', 'cad-mat2', 'cad-orgao2', 'cad-ano-temp', 'cad-mat-temp',
-   'cad-cargo-outro-temp', 'cad-orgao-outro-temp']
+   'cad-cargo-outro-temp', 'cad-orgao-outro-temp',
+   'cad-cargo1-enc', 'cad-mat1-enc', 'cad-cargo2-enc', 'cad-mat2-enc',
+   'cad-orgao2-enc', 'cad-observacao-enc']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('cad-ch1').selectedIndex = 0;
   document.getElementById('cad-ch2').selectedIndex = 0;
+  document.getElementById('cad-ch1-enc').selectedIndex = 0;
+  document.getElementById('cad-ch2-enc').selectedIndex = 0;
   document.getElementById('cad-unigep1').selectedIndex = 0;
   document.getElementById('cad-unigep2').selectedIndex = 0;
   document.getElementById('cad-categoria').selectedIndex = 0;
@@ -544,9 +571,7 @@ function resetFormularioCadastro() {
 
 document.getElementById('go-cadastro-always').addEventListener('click', () => {
   resetFormularioCadastro();
-  if (searchType === 'nome') document.getElementById('cad-nome').value = searchInput.value.trim();
-  if (searchType === 'matricula') document.getElementById('cad-mat1').value = searchInput.value.trim();
-  if (searchType === 'processo') document.getElementById('cad-processo').value = searchInput.value.trim();
+  document.getElementById('cad-nome').value = searchInput.value.trim();
   showView('view-cadastro');
 });
 
@@ -561,19 +586,28 @@ const cadOrgao2 = document.getElementById('cad-orgao2');
 const blocoVinculo1 = document.getElementById('bloco-vinculo1');
 const blocoVinculo2Normal = document.getElementById('bloco-vinculo2-normal');
 const blocoContratoTemp = document.getElementById('bloco-contrato-temp');
+const blocoEncerrado = document.getElementById('bloco-encerrado');
+const CATEGORIAS_ENCERRADAS = ['APOSENTADORIA / RESERVA', 'PENSÃO', 'PERDA DE OBJETO'];
 
 function atualizarCampoVinculo2() {
   const val = cadCategoria.value;
 
+  blocoVinculo1.classList.add('hidden');
+  blocoVinculo2Normal.classList.add('hidden');
+  blocoContratoTemp.classList.add('hidden');
+  blocoEncerrado.classList.add('hidden');
+
   if (val === 'CONTRATO TEMPORÁRIO') {
-    blocoVinculo1.classList.add('hidden');
-    blocoVinculo2Normal.classList.add('hidden');
     blocoContratoTemp.classList.remove('hidden');
     return;
   }
+  if (CATEGORIAS_ENCERRADAS.includes(val)) {
+    blocoEncerrado.classList.remove('hidden');
+    return;
+  }
+
   blocoVinculo1.classList.remove('hidden');
   blocoVinculo2Normal.classList.remove('hidden');
-  blocoContratoTemp.classList.add('hidden');
 
   if (val === 'SEDF + SEDF') {
     cadUnigep2.classList.remove('hidden');
@@ -607,6 +641,21 @@ document.getElementById('cad-salvar').addEventListener('click', async () => {
       mat1: document.getElementById('cad-mat-temp').value,
       cargo2: document.getElementById('cad-cargo-outro-temp').value,
       orgao2: document.getElementById('cad-orgao-outro-temp').value,
+      parecer: parecer
+    };
+  } else if (CATEGORIAS_ENCERRADAS.includes(categoria)) {
+    body = {
+      categoria: categoria,
+      processo: document.getElementById('cad-processo').value,
+      nome: document.getElementById('cad-nome').value,
+      cargo1: document.getElementById('cad-cargo1-enc').value,
+      mat1: document.getElementById('cad-mat1-enc').value,
+      ch1: document.getElementById('cad-ch1-enc').value,
+      cargo2: document.getElementById('cad-cargo2-enc').value,
+      mat2: document.getElementById('cad-mat2-enc').value,
+      ch2: document.getElementById('cad-ch2-enc').value,
+      orgao2: document.getElementById('cad-orgao2-enc').value,
+      observacao: document.getElementById('cad-observacao-enc').value,
       parecer: parecer
     };
   } else {
@@ -1052,6 +1101,61 @@ function renderRelatorio() {
 
 document.getElementById('rel-gerar').addEventListener('click', gerarRelatorio);
 document.getElementById('rel-filtro').addEventListener('change', renderRelatorio);
+
+// ---------------------------------------------------------------------
+// CONTAGEM DE PROCESSOS POR CATEGORIA (com deduplicação)
+// ---------------------------------------------------------------------
+const TODAS_CATEGORIAS = [
+  'SEDF + SEDF', 'SEDF + OUTRO', 'SUB JUDICE / CORREGEDORIA',
+  'PERDA DE OBJETO', 'PENSÃO', 'APOSENTADORIA / RESERVA', 'CONTRATO TEMPORÁRIO'
+];
+
+const contCheckboxes = document.getElementById('cont-checkboxes');
+TODAS_CATEGORIAS.forEach((cat, i) => {
+  const id = 'cont-cb-' + i;
+  const label = document.createElement('label');
+  label.style.cssText = 'display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:400; margin:0; background:#F7F5F1; padding:6px 10px; border-radius:6px; cursor:pointer;';
+  label.innerHTML = '<input type="checkbox" id="' + id + '" value="' + cat + '" checked> ' + cat;
+  contCheckboxes.appendChild(label);
+});
+
+document.getElementById('cont-gerar').addEventListener('click', async () => {
+  const selecionadas = TODAS_CATEGORIAS.filter((cat, i) => document.getElementById('cont-cb-' + i).checked);
+  const contLoading = document.getElementById('cont-loading');
+  const contResultado = document.getElementById('cont-resultado');
+  if (!selecionadas.length) {
+    contResultado.innerHTML = '<div class="box"><p class="muted" style="margin:0; font-size:13px;">Selecione ao menos uma categoria.</p></div>';
+    return;
+  }
+  contLoading.classList.remove('hidden');
+  contResultado.innerHTML = '';
+  try {
+    const url = API_URL + '?action=contarProcessos&categorias=' + encodeURIComponent(selecionadas.join(','));
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (data.erro) throw new Error(data.erro);
+
+    let html = '<div class="row" style="margin-bottom:14px; gap:12px;">' +
+      '<div class="box" style="flex:1; text-align:center; border-color:#97C459; background:#EAF3DE;"><p style="margin:0; font-size:24px; font-weight:600; color:#27500A;">' + data.totalUnico + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#3B6D11;">Processos únicos</p></div>' +
+      (data.duplicadosRemovidos > 0
+        ? '<div class="box" style="flex:1; text-align:center; border-color:#E8C77A; background:#FAF3E2;"><p style="margin:0; font-size:24px; font-weight:600; color:#85560B;">' + data.duplicadosRemovidos + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#85560B;">Duplicados removidos</p></div>'
+        : '') +
+      '</div>';
+
+    html += '<table style="width:100%; border-collapse:collapse; font-size:12.5px;">' +
+      '<thead><tr style="background:#F1EFE8; text-align:left;"><th style="padding:6px 10px;">Categoria</th><th style="padding:6px 10px;">Quantidade</th></tr></thead><tbody>';
+    selecionadas.forEach(cat => {
+      html += '<tr style="border-top:1px solid #E4E0D4;"><td style="padding:6px 10px;">' + esc(cat) + '</td><td style="padding:6px 10px;">' + (data.porCategoria[cat] || 0) + '</td></tr>';
+    });
+    html += '</tbody></table>';
+
+    contResultado.innerHTML = html;
+  } catch (err) {
+    contResultado.innerHTML = '<div class="box" style="border-color:#D98C8C;"><p style="margin:0; font-size:13px; color:#A33;">Erro ao contar: ' + esc(err.message) + '</p></div>';
+  } finally {
+    contLoading.classList.add('hidden');
+  }
+});
 </script>
 </body>
 </html>
