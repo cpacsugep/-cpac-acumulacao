@@ -349,28 +349,50 @@
 
   <div id="area-relatorios" class="hidden">
     <div class="card" style="border-radius:0 0 12px 12px;">
-      <h2 class="section-title">Relatório de acompanhamento anual</h2>
-      <p class="section-sub">Processos das categorias SEDF + SEDF e SEDF + OUTRO que estão atrasados ou perto de vencer o prazo legal de reavaliação anual da compatibilidade.</p>
-      <div class="row" style="margin-bottom:14px;">
-        <button type="button" id="rel-gerar" class="primary"><i class="ti ti-refresh"></i> Gerar relatório</button>
-        <select id="rel-filtro">
-          <option value="todos">Todos (atrasados + vencendo)</option>
-          <option value="ATRASADO">Só atrasados</option>
-          <option value="VENCENDO EM BREVE">Só vencendo em breve</option>
-        </select>
-      </div>
-      <div id="rel-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Consultando planilha...</div>
-      <div id="rel-resumo"></div>
-      <div id="rel-tabela"></div>
 
-      <div class="box" style="margin-top:24px;">
-        <p style="margin:0 0 4px; font-size:13px; font-weight:500; color:#1B3A5C;">Contagem de processos catalogados</p>
-        <p style="margin:0 0 12px; font-size:11.5px; color:#8A897F;">Selecione as categorias que deseja somar. Processos duplicados (mesmo número em mais de uma categoria) são contados uma única vez.</p>
-        <div id="cont-checkboxes" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;"></div>
+      <div class="row" style="gap:6px; margin-bottom:22px; border-bottom:1px solid #E4E0D4; padding-bottom:14px;">
+        <button type="button" id="subnav-acompanhamento" class="primary" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-calendar-due"></i> Acompanhamento anual</button>
+        <button type="button" id="subnav-contagem" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-calculator"></i> Contagem de processos</button>
+      </div>
+
+      <!-- SUB-ABA: ACOMPANHAMENTO ANUAL -->
+      <div id="subview-acompanhamento">
+        <h2 class="section-title">Relatório de acompanhamento anual</h2>
+        <p class="section-sub">Processos das categorias SEDF + SEDF e SEDF + OUTRO que estão atrasados ou perto de vencer o prazo legal de reavaliação anual da compatibilidade.</p>
+
+        <div class="row" style="align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+          <button type="button" id="rel-gerar" class="primary"><i class="ti ti-refresh"></i> Gerar relatório</button>
+          <div style="display:flex; gap:4px; background:#F1EFE8; padding:4px; border-radius:8px;">
+            <button type="button" class="rel-filtro-btn primary" data-filtro="todos" style="border:none; font-size:12px; padding:6px 12px;">Todos</button>
+            <button type="button" class="rel-filtro-btn" data-filtro="ATRASADO" style="border:none; font-size:12px; padding:6px 12px;">Atrasados</button>
+            <button type="button" class="rel-filtro-btn" data-filtro="VENCENDO EM BREVE" style="border:none; font-size:12px; padding:6px 12px;">Vencendo em breve</button>
+          </div>
+        </div>
+
+        <div id="rel-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Consultando planilha...</div>
+        <div id="rel-resumo"></div>
+        <div id="rel-tabela"></div>
+      </div>
+
+      <!-- SUB-ABA: CONTAGEM DE PROCESSOS -->
+      <div id="subview-contagem" class="hidden">
+        <h2 class="section-title">Contagem de processos catalogados</h2>
+        <p class="section-sub">Selecione as categorias que deseja somar. Processos duplicados (mesmo número em mais de uma categoria) são contados uma única vez.</p>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label style="margin:0; font-size:12px; color:#6B6A62;">Categorias</label>
+          <div style="display:flex; gap:12px;">
+            <span id="cont-selecionar-todas" style="font-size:11.5px; color:#1B3A5C; cursor:pointer; text-decoration:underline;">Selecionar todas</span>
+            <span id="cont-limpar-todas" style="font-size:11.5px; color:#6B6A62; cursor:pointer; text-decoration:underline;">Limpar seleção</span>
+          </div>
+        </div>
+        <div id="cont-checkboxes" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:18px;"></div>
+
         <button type="button" id="cont-gerar" class="primary"><i class="ti ti-calculator"></i> Contar processos</button>
         <div id="cont-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Contando...</div>
-        <div id="cont-resultado" style="margin-top:14px;"></div>
+        <div id="cont-resultado" style="margin-top:16px;"></div>
       </div>
+
     </div>
   </div>
 
@@ -1032,10 +1054,38 @@ navRelatorios.addEventListener('click', () => {
   navCadastro.classList.remove('primary');
 });
 
+// Sub-abas dentro de Relatórios
+const subviewAcompanhamento = document.getElementById('subview-acompanhamento');
+const subviewContagem = document.getElementById('subview-contagem');
+const subnavAcompanhamento = document.getElementById('subnav-acompanhamento');
+const subnavContagem = document.getElementById('subnav-contagem');
+
+subnavAcompanhamento.addEventListener('click', () => {
+  subviewAcompanhamento.classList.remove('hidden');
+  subviewContagem.classList.add('hidden');
+  subnavAcompanhamento.classList.add('primary');
+  subnavContagem.classList.remove('primary');
+});
+subnavContagem.addEventListener('click', () => {
+  subviewAcompanhamento.classList.add('hidden');
+  subviewContagem.classList.remove('hidden');
+  subnavContagem.classList.add('primary');
+  subnavAcompanhamento.classList.remove('primary');
+});
+
 // ---------------------------------------------------------------------
 // RELATÓRIO DE ACOMPANHAMENTO ANUAL
 // ---------------------------------------------------------------------
 let ultimoRelatorio = [];
+let filtroRelatorioAtual = 'todos';
+
+document.querySelectorAll('.rel-filtro-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    filtroRelatorioAtual = btn.getAttribute('data-filtro');
+    document.querySelectorAll('.rel-filtro-btn').forEach(b => b.classList.toggle('primary', b === btn));
+    renderRelatorio();
+  });
+});
 
 async function gerarRelatorio() {
   const relLoading = document.getElementById('rel-loading');
@@ -1058,7 +1108,7 @@ async function gerarRelatorio() {
 }
 
 function renderRelatorio() {
-  const filtro = document.getElementById('rel-filtro').value;
+  const filtro = filtroRelatorioAtual;
   const relResumo = document.getElementById('rel-resumo');
   const relTabela = document.getElementById('rel-tabela');
 
@@ -1100,7 +1150,6 @@ function renderRelatorio() {
 }
 
 document.getElementById('rel-gerar').addEventListener('click', gerarRelatorio);
-document.getElementById('rel-filtro').addEventListener('change', renderRelatorio);
 
 // ---------------------------------------------------------------------
 // CONTAGEM DE PROCESSOS POR CATEGORIA (com deduplicação)
@@ -1114,9 +1163,16 @@ const contCheckboxes = document.getElementById('cont-checkboxes');
 TODAS_CATEGORIAS.forEach((cat, i) => {
   const id = 'cont-cb-' + i;
   const label = document.createElement('label');
-  label.style.cssText = 'display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:400; margin:0; background:#F7F5F1; padding:6px 10px; border-radius:6px; cursor:pointer;';
-  label.innerHTML = '<input type="checkbox" id="' + id + '" value="' + cat + '" checked> ' + cat;
+  label.style.cssText = 'display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:400; margin:0; background:#F7F5F1; padding:8px 12px; border-radius:6px; cursor:pointer; border:1px solid #E4E0D4;';
+  label.innerHTML = '<input type="checkbox" id="' + id + '" value="' + cat + '" checked style="width:auto; margin:0;"> ' + cat;
   contCheckboxes.appendChild(label);
+});
+
+document.getElementById('cont-selecionar-todas').addEventListener('click', () => {
+  TODAS_CATEGORIAS.forEach((cat, i) => { document.getElementById('cont-cb-' + i).checked = true; });
+});
+document.getElementById('cont-limpar-todas').addEventListener('click', () => {
+  TODAS_CATEGORIAS.forEach((cat, i) => { document.getElementById('cont-cb-' + i).checked = false; });
 });
 
 document.getElementById('cont-gerar').addEventListener('click', async () => {
