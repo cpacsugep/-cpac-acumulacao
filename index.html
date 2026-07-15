@@ -52,6 +52,23 @@
 </head>
 <body>
 
+<div id="dup-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(27,58,92,0.55); display:flex; align-items:center; justify-content:center; z-index:2000;">
+  <div style="background:#FFFFFF; border-radius:12px; padding:24px 28px; max-width:460px; width:90%; box-shadow:0 12px 32px rgba(0,0,0,0.25);">
+    <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:14px;">
+      <i class="ti ti-alert-triangle" style="font-size:22px; color:#B8862B; margin-top:2px;"></i>
+      <div>
+        <p style="margin:0; font-size:15px; font-weight:500; color:#1B3A5C;">Possível cadastro duplicado</p>
+        <p style="margin:4px 0 0; font-size:12.5px; color:#6B6A62;">Encontramos registro(s) parecido(s) nesta categoria:</p>
+      </div>
+    </div>
+    <div id="dup-modal-lista" style="background:#F7F5F1; border-radius:8px; padding:12px 14px; font-size:12.5px; color:#2C2C2A; line-height:1.8; margin-bottom:20px; max-height:220px; overflow-y:auto;"></div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button type="button" id="dup-modal-cancelar">Cancelar cadastro</button>
+      <button type="button" id="dup-modal-continuar" class="gold">Continuar mesmo assim</button>
+    </div>
+  </div>
+</div>
+
 <div id="login-overlay" style="position:fixed; inset:0; background:#1B3A5C; display:flex; align-items:center; justify-content:center; z-index:1000;">
   <div style="background:#FFFFFF; border-radius:12px; padding:36px 32px; max-width:380px; width:90%; text-align:center;">
     <p style="margin:0 0 4px; font-family:Georgia,serif; font-size:18px; color:#1B3A5C;">CPAC Digital</p>
@@ -122,6 +139,23 @@
           <option value="PENSÃO">PENSÃO</option>
           <option value="PERDA DE OBJETO">PERDA DE OBJETO</option>
         </select>
+      </div>
+
+      <div id="bloco-atribuicao" class="hidden" style="margin-bottom:18px;">
+        <div class="grid2">
+          <div>
+            <label>Atribuição (analista responsável)</label>
+            <select id="cad-atribuicao">
+              <option>AUGUSTO</option>
+              <option>JESSICA</option>
+              <option>DILCEIA</option>
+            </select>
+          </div>
+          <div>
+            <label>Próxima aferição (Acompanhamento Anual)</label>
+            <input id="cad-acompanhamento" type="date">
+          </div>
+        </div>
       </div>
 
       <div id="bloco-vinculo1" class="box">
@@ -270,6 +304,7 @@
           <input id="edit-unigep1" type="text" placeholder="Unigep (Vínculo 1)">
           <input id="edit-orgao2" type="text" placeholder="Órgão/entidade ou Unigep (Vínculo 2)">
         </div>
+        <div style="margin-bottom:12px;"><label>Próxima aferição (Acompanhamento Anual)</label><input id="edit-acompanhamento" type="date"></div>
         <div style="margin-bottom:12px;"><label>Último parecer emitido</label><input id="edit-parecer" type="text"></div>
         <div style="display:flex; justify-content:flex-end; gap:8px;">
           <button type="button" id="edit-cancelar">Cancelar</button>
@@ -488,6 +523,19 @@ window.addEventListener('load', () => {
 
 function esc(s) { return (s === undefined || s === null || s === '') ? '—' : String(s); }
 
+function dateInputParaBr(valorInput) {
+  if (!valorInput) return '';
+  const partes = valorInput.split('-'); // yyyy-mm-dd
+  if (partes.length !== 3) return valorInput;
+  return partes[2] + '/' + partes[1] + '/' + partes[0];
+}
+function brParaDateInput(valorBr) {
+  if (!valorBr) return '';
+  const partes = String(valorBr).split('/'); // dd/mm/yyyy
+  if (partes.length !== 3) return '';
+  return partes[2] + '-' + partes[1].padStart(2, '0') + '-' + partes[0].padStart(2, '0');
+}
+
 // ---------------------------------------------------------------------
 // CAIXA ALTA AUTOMÁTICA em todos os campos de texto (busca, cadastro, migração)
 // ---------------------------------------------------------------------
@@ -582,7 +630,7 @@ function resetFormularioCadastro() {
    'cad-cargo2', 'cad-mat2', 'cad-orgao2', 'cad-ano-temp', 'cad-mat-temp',
    'cad-cargo-outro-temp', 'cad-orgao-outro-temp',
    'cad-cargo1-enc', 'cad-mat1-enc', 'cad-cargo2-enc', 'cad-mat2-enc',
-   'cad-orgao2-enc', 'cad-observacao-enc']
+   'cad-orgao2-enc', 'cad-observacao-enc', 'cad-acompanhamento']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   document.getElementById('cad-ch1').selectedIndex = 0;
   document.getElementById('cad-ch2').selectedIndex = 0;
@@ -614,6 +662,22 @@ const blocoContratoTemp = document.getElementById('bloco-contrato-temp');
 const blocoEncerrado = document.getElementById('bloco-encerrado');
 const CATEGORIAS_ENCERRADAS = ['APOSENTADORIA / RESERVA', 'PENSÃO', 'PERDA DE OBJETO'];
 
+const blocoAtribuicao = document.getElementById('bloco-atribuicao');
+const CATEGORIAS_COM_ATRIBUICAO = ['SEDF + SEDF', 'SEDF + OUTRO'];
+
+function preencherAtribuicaoPadrao() {
+  if (!currentUser) return;
+  const nomeLower = currentUser.nome.toLowerCase();
+  const select = document.getElementById('cad-atribuicao');
+  for (let i = 0; i < select.options.length; i++) {
+    const opcaoLower = select.options[i].value.toLowerCase();
+    if (nomeLower.includes(opcaoLower.split(' ')[0])) {
+      select.selectedIndex = i;
+      return;
+    }
+  }
+}
+
 function atualizarCampoVinculo2() {
   const val = cadCategoria.value;
 
@@ -621,6 +685,8 @@ function atualizarCampoVinculo2() {
   blocoVinculo2Normal.classList.add('hidden');
   blocoContratoTemp.classList.add('hidden');
   blocoEncerrado.classList.add('hidden');
+  blocoAtribuicao.classList.toggle('hidden', !CATEGORIAS_COM_ATRIBUICAO.includes(val));
+  if (CATEGORIAS_COM_ATRIBUICAO.includes(val)) preencherAtribuicaoPadrao();
 
   if (val === 'CONTRATO TEMPORÁRIO') {
     blocoContratoTemp.classList.remove('hidden');
@@ -647,10 +713,77 @@ function atualizarCampoVinculo2() {
 cadCategoria.addEventListener('change', atualizarCampoVinculo2);
 atualizarCampoVinculo2();
 
+function normalizeCodeClient(s) { return (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, ''); }
+
+function mostrarModalDuplicidade(detalhesHtml) {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('dup-modal-overlay');
+    const lista = document.getElementById('dup-modal-lista');
+    const btnCancelar = document.getElementById('dup-modal-cancelar');
+    const btnContinuar = document.getElementById('dup-modal-continuar');
+
+    lista.innerHTML = detalhesHtml;
+    overlay.classList.remove('hidden');
+
+    function limpar(resultado) {
+      overlay.classList.add('hidden');
+      btnCancelar.removeEventListener('click', onCancelar);
+      btnContinuar.removeEventListener('click', onContinuar);
+      resolve(resultado);
+    }
+    function onCancelar() { limpar(false); }
+    function onContinuar() { limpar(true); }
+
+    btnCancelar.addEventListener('click', onCancelar);
+    btnContinuar.addEventListener('click', onContinuar);
+  });
+}
+
+async function verificarDuplicidade(categoria, nome, mat1, ano) {
+  if (!nome) return true; // sem nome não dá pra verificar, deixa passar
+  try {
+    const registros = await buscarNaAPI(nome);
+    const mesmaCategoria = registros.filter(r => r.categoria === categoria);
+    let conflitantes;
+    if (categoria === 'CONTRATO TEMPORÁRIO') {
+      conflitantes = mesmaCategoria.filter(r => String(r.ano || '').trim() === String(ano || '').trim() && ano);
+    } else {
+      const mat1Norm = normalizeCodeClient(mat1);
+      conflitantes = mesmaCategoria.filter(r =>
+        (mat1Norm && normalizeCodeClient(r.mat1) === mat1Norm) ||
+        (r.nome || '').trim().toUpperCase() === nome.trim().toUpperCase()
+      );
+    }
+    if (conflitantes.length) {
+      const detalhesHtml = conflitantes.map(r =>
+        '<div style="margin-bottom:6px;">• <strong>' + esc(r.nome) + '</strong> — processo ' + esc(r.processo || 's/nº') + (r.ano ? ', ano ' + esc(r.ano) : '') + '</div>'
+      ).join('');
+      return await mostrarModalDuplicidade(detalhesHtml);
+    }
+    return true;
+  } catch (err) {
+    return true; // se a verificação falhar, não bloqueia o cadastro
+  }
+}
+
 document.getElementById('cad-salvar').addEventListener('click', async () => {
   const categoria = cadCategoria.value;
   const parecer = document.getElementById('cad-parecer').value.trim();
+  const nomeDigitado = document.getElementById('cad-nome').value.trim();
   let body;
+
+  let matParaVerificar = '';
+  let anoParaVerificar = '';
+  if (categoria === 'CONTRATO TEMPORÁRIO') {
+    anoParaVerificar = document.getElementById('cad-ano-temp').value.trim();
+  } else if (CATEGORIAS_ENCERRADAS.includes(categoria)) {
+    matParaVerificar = document.getElementById('cad-mat1-enc').value.trim();
+  } else {
+    matParaVerificar = document.getElementById('cad-mat1').value.trim();
+  }
+
+  const podeContinuar = await verificarDuplicidade(categoria, nomeDigitado, matParaVerificar, anoParaVerificar);
+  if (!podeContinuar) return;
 
   if (categoria === 'CONTRATO TEMPORÁRIO') {
     // Vínculo 1 nesta categoria é sempre o próprio contrato temporário na SEEDF —
@@ -697,6 +830,8 @@ document.getElementById('cad-salvar').addEventListener('click', async () => {
       unigep2: categoria === 'SEDF + SEDF' ? cadUnigep2.value : '',
       orgao2: categoria !== 'SEDF + SEDF' ? cadOrgao2.value : '',
       ch2: document.getElementById('cad-ch2').value,
+      atribuicao: document.getElementById('cad-atribuicao').value,
+      acompanhamentoAnual: dateInputParaBr(document.getElementById('cad-acompanhamento').value),
       parecer: parecer
     };
   }
@@ -779,6 +914,7 @@ document.getElementById('ficha-editar-toggle').addEventListener('click', () => {
   document.getElementById('edit-ch2').value = r.ch2 || '';
   document.getElementById('edit-unigep1').value = r.unigep1 || '';
   document.getElementById('edit-orgao2').value = r.orgao2 || r.unigep2 || '';
+  document.getElementById('edit-acompanhamento').value = brParaDateInput(r.acompanhamentoAnual);
   document.getElementById('edit-parecer').value = r.parecer || '';
   editResultado.classList.add('hidden');
   editarPainel.classList.toggle('hidden');
@@ -803,6 +939,7 @@ document.getElementById('edit-salvar').addEventListener('click', async () => {
     ch1: document.getElementById('edit-ch1').value,
     ch2: document.getElementById('edit-ch2').value,
     unigep1: document.getElementById('edit-unigep1').value,
+    acompanhamentoAnual: dateInputParaBr(document.getElementById('edit-acompanhamento').value),
     parecer: parecer
   };
   if (r.categoria === 'SEDF + SEDF') { body.unigep2 = orgaoOuUnigep; }
@@ -820,6 +957,7 @@ document.getElementById('edit-salvar').addEventListener('click', async () => {
     Object.assign(registroAtualFicha, {
       cargo1: body.cargo1, mat1: body.mat1, cargo2: body.cargo2, mat2: body.mat2,
       ch1: body.ch1, ch2: body.ch2, parecer: parecer, unigep1: body.unigep1,
+      acompanhamentoAnual: body.acompanhamentoAnual,
       orgao2: r.categoria !== 'SEDF + SEDF' ? orgaoOuUnigep : r.orgao2,
       unigep2: r.categoria === 'SEDF + SEDF' ? orgaoOuUnigep : r.unigep2
     });
