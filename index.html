@@ -165,7 +165,7 @@
           <input id="cad-mat1" type="text" placeholder="Matrícula">
         </div>
         <div class="grid2" style="margin-top:10px;">
-          <select id="cad-ch1"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
+          <select id="cad-ch1"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="24">24h semanais</option><option value="25">25h semanais</option><option value="30">30h semanais</option><option value="35">35h semanais</option><option value="36">36h semanais</option><option value="40">40h semanais</option><option value="44">44h semanais</option></select>
           <select id="cad-unigep1">
             <option>SEDE</option>
             <option>BRAZLÂNDIA</option>
@@ -193,7 +193,7 @@
           <input id="cad-mat2" type="text" placeholder="Matrícula">
         </div>
         <div class="grid2" style="margin-top:10px;">
-          <select id="cad-ch2"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
+          <select id="cad-ch2"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="24">24h semanais</option><option value="25">25h semanais</option><option value="30">30h semanais</option><option value="35">35h semanais</option><option value="36">36h semanais</option><option value="40">40h semanais</option><option value="44">44h semanais</option></select>
           <select id="cad-unigep2" class="hidden">
             <option>SEDE</option>
             <option>BRAZLÂNDIA</option>
@@ -245,7 +245,7 @@
             <input id="cad-mat1-enc" type="text" placeholder="Matrícula">
           </div>
           <div style="margin-top:10px;">
-            <select id="cad-ch1-enc"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
+            <select id="cad-ch1-enc"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="24">24h semanais</option><option value="25">25h semanais</option><option value="30">30h semanais</option><option value="35">35h semanais</option><option value="36">36h semanais</option><option value="40">40h semanais</option><option value="44">44h semanais</option></select>
           </div>
         </div>
         <div class="box">
@@ -255,7 +255,7 @@
             <input id="cad-mat2-enc" type="text" placeholder="Matrícula">
           </div>
           <div class="grid2" style="margin-top:10px;">
-            <select id="cad-ch2-enc"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="30">30h semanais</option><option value="40">40h semanais</option></select>
+            <select id="cad-ch2-enc"><option value="">Carga horária</option><option value="20">20h semanais</option><option value="24">24h semanais</option><option value="25">25h semanais</option><option value="30">30h semanais</option><option value="35">35h semanais</option><option value="36">36h semanais</option><option value="40">40h semanais</option><option value="44">44h semanais</option></select>
             <input id="cad-orgao2-enc" type="text" placeholder="Órgão / entidade">
           </div>
         </div>
@@ -284,27 +284,66 @@
 
       <div id="editar-painel" class="hidden box" style="margin-bottom:18px;">
         <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Alterar dados do processo</p>
-        <div class="grid2" style="margin-bottom:4px;">
-          <label style="margin:0;">Vínculo 1</label>
-          <label style="margin:0;">Vínculo 2</label>
+
+        <!-- Padrão: SEDF + SEDF e SEDF + OUTRO -->
+        <div id="edit-bloco-padrao">
+          <div class="grid2" style="margin-bottom:4px;">
+            <label style="margin:0;">Vínculo 1</label>
+            <label style="margin:0;">Vínculo 2</label>
+          </div>
+          <div class="grid2" style="margin-bottom:10px;">
+            <input id="edit-cargo1" type="text" placeholder="Cargo">
+            <input id="edit-cargo2" type="text" placeholder="Cargo">
+          </div>
+          <div class="grid2" style="margin-bottom:10px;">
+            <input id="edit-mat1" type="text" placeholder="Matrícula">
+            <input id="edit-mat2" type="text" placeholder="Matrícula">
+          </div>
+          <div class="grid2" style="margin-bottom:10px;">
+            <input id="edit-ch1" type="text" placeholder="Carga horária">
+            <input id="edit-ch2" type="text" placeholder="Carga horária">
+          </div>
+          <div class="grid2" style="margin-bottom:10px;">
+            <input id="edit-unigep1" type="text" placeholder="Unigep (Vínculo 1)">
+            <input id="edit-orgao2" type="text" placeholder="Órgão/entidade ou Unigep (Vínculo 2)">
+          </div>
+          <div style="margin-bottom:12px;"><label>Próxima aferição (Acompanhamento Anual)</label><input id="edit-acompanhamento" type="date"></div>
         </div>
-        <div class="grid2" style="margin-bottom:10px;">
-          <input id="edit-cargo1" type="text" placeholder="Cargo">
-          <input id="edit-cargo2" type="text" placeholder="Cargo">
+
+        <!-- Contrato Temporário -->
+        <div id="edit-bloco-contrato-temp" class="hidden">
+          <div class="grid2" style="margin-bottom:10px;">
+            <input id="edit-ano-temp" type="text" placeholder="Ano do contrato">
+            <input id="edit-mat-temp" type="text" placeholder="Matrícula do contrato temporário">
+          </div>
+          <div class="grid2" style="margin-bottom:10px;">
+            <input id="edit-cargo-outro-temp" type="text" placeholder="Cargo do outro vínculo">
+            <input id="edit-orgao-outro-temp" type="text" placeholder="Órgão/entidade do outro vínculo">
+          </div>
         </div>
-        <div class="grid2" style="margin-bottom:10px;">
-          <input id="edit-mat1" type="text" placeholder="Matrícula">
-          <input id="edit-mat2" type="text" placeholder="Matrícula">
+
+        <!-- Categorias encerradas: Aposentadoria/Reserva, Pensão, Perda de Objeto -->
+        <div id="edit-bloco-encerrado" class="hidden">
+          <div class="grid2" style="margin-bottom:4px;">
+            <label style="margin:0;">Vínculo 1</label>
+            <label style="margin:0;">Vínculo 2</label>
+          </div>
+          <div class="grid2" style="margin-bottom:10px;">
+            <input id="edit-cargo1-enc" type="text" placeholder="Cargo">
+            <input id="edit-cargo2-enc" type="text" placeholder="Cargo">
+          </div>
+          <div class="grid2" style="margin-bottom:10px;">
+            <input id="edit-mat1-enc" type="text" placeholder="Matrícula">
+            <input id="edit-mat2-enc" type="text" placeholder="Matrícula">
+          </div>
+          <div class="grid2" style="margin-bottom:10px;">
+            <input id="edit-ch1-enc" type="text" placeholder="Carga horária">
+            <input id="edit-ch2-enc" type="text" placeholder="Carga horária">
+          </div>
+          <div style="margin-bottom:10px;"><input id="edit-orgao2-enc" type="text" placeholder="Órgão / entidade (Vínculo 2)"></div>
+          <div style="margin-bottom:12px;"><label>Observação (motivo, data, órgão pagador da pensão, etc.)</label><input id="edit-observacao-enc" type="text"></div>
         </div>
-        <div class="grid2" style="margin-bottom:10px;">
-          <input id="edit-ch1" type="text" placeholder="Carga horária">
-          <input id="edit-ch2" type="text" placeholder="Carga horária">
-        </div>
-        <div class="grid2" style="margin-bottom:10px;">
-          <input id="edit-unigep1" type="text" placeholder="Unigep (Vínculo 1)">
-          <input id="edit-orgao2" type="text" placeholder="Órgão/entidade ou Unigep (Vínculo 2)">
-        </div>
-        <div style="margin-bottom:12px;"><label>Próxima aferição (Acompanhamento Anual)</label><input id="edit-acompanhamento" type="date"></div>
+
         <div style="margin-bottom:12px;"><label>Último parecer emitido</label><input id="edit-parecer" type="text"></div>
         <div style="display:flex; justify-content:flex-end; gap:8px;">
           <button type="button" id="edit-cancelar">Cancelar</button>
@@ -902,19 +941,47 @@ document.getElementById('ficha-baixar').addEventListener('click', () => window.p
 
 const editarPainel = document.getElementById('editar-painel');
 const editResultado = document.getElementById('edit-resultado');
+const editBlocoPadrao = document.getElementById('edit-bloco-padrao');
+const editBlocoContratoTemp = document.getElementById('edit-bloco-contrato-temp');
+const editBlocoEncerrado = document.getElementById('edit-bloco-encerrado');
 
 document.getElementById('ficha-editar-toggle').addEventListener('click', () => {
   if (!registroAtualFicha) return;
   const r = registroAtualFicha;
-  document.getElementById('edit-cargo1').value = r.cargo1 || '';
-  document.getElementById('edit-mat1').value = r.mat1 || '';
-  document.getElementById('edit-cargo2').value = r.cargo2 || '';
-  document.getElementById('edit-mat2').value = r.mat2 || '';
-  document.getElementById('edit-ch1').value = r.ch1 || '';
-  document.getElementById('edit-ch2').value = r.ch2 || '';
-  document.getElementById('edit-unigep1').value = r.unigep1 || '';
-  document.getElementById('edit-orgao2').value = r.orgao2 || r.unigep2 || '';
-  document.getElementById('edit-acompanhamento').value = brParaDateInput(r.acompanhamentoAnual);
+
+  editBlocoPadrao.classList.add('hidden');
+  editBlocoContratoTemp.classList.add('hidden');
+  editBlocoEncerrado.classList.add('hidden');
+
+  if (r.categoria === 'CONTRATO TEMPORÁRIO') {
+    editBlocoContratoTemp.classList.remove('hidden');
+    document.getElementById('edit-ano-temp').value = r.ano || '';
+    document.getElementById('edit-mat-temp').value = r.mat1 || '';
+    document.getElementById('edit-cargo-outro-temp').value = r.cargo2 || '';
+    document.getElementById('edit-orgao-outro-temp').value = r.orgao2 || '';
+  } else if (CATEGORIAS_ENCERRADAS.includes(r.categoria)) {
+    editBlocoEncerrado.classList.remove('hidden');
+    document.getElementById('edit-cargo1-enc').value = r.cargo1 || '';
+    document.getElementById('edit-mat1-enc').value = r.mat1 || '';
+    document.getElementById('edit-cargo2-enc').value = r.cargo2 || '';
+    document.getElementById('edit-mat2-enc').value = r.mat2 || '';
+    document.getElementById('edit-ch1-enc').value = r.ch1 || '';
+    document.getElementById('edit-ch2-enc').value = r.ch2 || '';
+    document.getElementById('edit-orgao2-enc').value = r.orgao2 || '';
+    document.getElementById('edit-observacao-enc').value = r.observacao || '';
+  } else {
+    editBlocoPadrao.classList.remove('hidden');
+    document.getElementById('edit-cargo1').value = r.cargo1 || '';
+    document.getElementById('edit-mat1').value = r.mat1 || '';
+    document.getElementById('edit-cargo2').value = r.cargo2 || '';
+    document.getElementById('edit-mat2').value = r.mat2 || '';
+    document.getElementById('edit-ch1').value = r.ch1 || '';
+    document.getElementById('edit-ch2').value = r.ch2 || '';
+    document.getElementById('edit-unigep1').value = r.unigep1 || '';
+    document.getElementById('edit-orgao2').value = r.orgao2 || r.unigep2 || '';
+    document.getElementById('edit-acompanhamento').value = brParaDateInput(r.acompanhamentoAnual);
+  }
+
   document.getElementById('edit-parecer').value = r.parecer || '';
   editResultado.classList.add('hidden');
   editarPainel.classList.toggle('hidden');
@@ -926,24 +993,68 @@ document.getElementById('edit-salvar').addEventListener('click', async () => {
   if (!registroAtualFicha) return;
   const r = registroAtualFicha;
   const parecer = document.getElementById('edit-parecer').value.trim();
-  const orgaoOuUnigep = document.getElementById('edit-orgao2').value.trim();
+  let body;
+  let atualizacoesMemoria;
 
-  const body = {
-    action: 'atualizar',
-    categoria: r.categoria,
-    linha: r.linha,
-    cargo1: document.getElementById('edit-cargo1').value,
-    mat1: document.getElementById('edit-mat1').value,
-    cargo2: document.getElementById('edit-cargo2').value,
-    mat2: document.getElementById('edit-mat2').value,
-    ch1: document.getElementById('edit-ch1').value,
-    ch2: document.getElementById('edit-ch2').value,
-    unigep1: document.getElementById('edit-unigep1').value,
-    acompanhamentoAnual: dateInputParaBr(document.getElementById('edit-acompanhamento').value),
-    parecer: parecer
-  };
-  if (r.categoria === 'SEDF + SEDF') { body.unigep2 = orgaoOuUnigep; }
-  else { body.orgao2 = orgaoOuUnigep; }
+  if (r.categoria === 'CONTRATO TEMPORÁRIO') {
+    body = {
+      action: 'atualizar',
+      categoria: r.categoria,
+      linha: r.linha,
+      ano: document.getElementById('edit-ano-temp').value,
+      mat1: document.getElementById('edit-mat-temp').value,
+      cargo2: document.getElementById('edit-cargo-outro-temp').value,
+      orgao2: document.getElementById('edit-orgao-outro-temp').value,
+      parecer: parecer
+    };
+    atualizacoesMemoria = {
+      ano: body.ano, mat1: body.mat1, cargo2: body.cargo2, orgao2: body.orgao2, parecer: parecer
+    };
+  } else if (CATEGORIAS_ENCERRADAS.includes(r.categoria)) {
+    body = {
+      action: 'atualizar',
+      categoria: r.categoria,
+      linha: r.linha,
+      cargo1: document.getElementById('edit-cargo1-enc').value,
+      mat1: document.getElementById('edit-mat1-enc').value,
+      cargo2: document.getElementById('edit-cargo2-enc').value,
+      mat2: document.getElementById('edit-mat2-enc').value,
+      ch1: document.getElementById('edit-ch1-enc').value,
+      ch2: document.getElementById('edit-ch2-enc').value,
+      orgao2: document.getElementById('edit-orgao2-enc').value,
+      observacao: document.getElementById('edit-observacao-enc').value,
+      parecer: parecer
+    };
+    atualizacoesMemoria = {
+      cargo1: body.cargo1, mat1: body.mat1, cargo2: body.cargo2, mat2: body.mat2,
+      ch1: body.ch1, ch2: body.ch2, orgao2: body.orgao2, observacao: body.observacao, parecer: parecer
+    };
+  } else {
+    const orgaoOuUnigep = document.getElementById('edit-orgao2').value.trim();
+    body = {
+      action: 'atualizar',
+      categoria: r.categoria,
+      linha: r.linha,
+      cargo1: document.getElementById('edit-cargo1').value,
+      mat1: document.getElementById('edit-mat1').value,
+      cargo2: document.getElementById('edit-cargo2').value,
+      mat2: document.getElementById('edit-mat2').value,
+      ch1: document.getElementById('edit-ch1').value,
+      ch2: document.getElementById('edit-ch2').value,
+      unigep1: document.getElementById('edit-unigep1').value,
+      acompanhamentoAnual: dateInputParaBr(document.getElementById('edit-acompanhamento').value),
+      parecer: parecer
+    };
+    if (r.categoria === 'SEDF + SEDF') { body.unigep2 = orgaoOuUnigep; }
+    else { body.orgao2 = orgaoOuUnigep; }
+    atualizacoesMemoria = {
+      cargo1: body.cargo1, mat1: body.mat1, cargo2: body.cargo2, mat2: body.mat2,
+      ch1: body.ch1, ch2: body.ch2, unigep1: body.unigep1, parecer: parecer,
+      acompanhamentoAnual: body.acompanhamentoAnual,
+      orgao2: r.categoria !== 'SEDF + SEDF' ? orgaoOuUnigep : r.orgao2,
+      unigep2: r.categoria === 'SEDF + SEDF' ? orgaoOuUnigep : r.unigep2
+    };
+  }
 
   const btn = document.getElementById('edit-salvar');
   btn.disabled = true; btn.textContent = 'Salvando...';
@@ -953,14 +1064,7 @@ document.getElementById('edit-salvar').addEventListener('click', async () => {
     if (data.erro) throw new Error(data.erro);
     editResultado.classList.remove('hidden');
     editResultado.textContent = 'Dados atualizados com sucesso na planilha.';
-    // Atualiza o registro em memória e reexibe a ficha com os novos dados
-    Object.assign(registroAtualFicha, {
-      cargo1: body.cargo1, mat1: body.mat1, cargo2: body.cargo2, mat2: body.mat2,
-      ch1: body.ch1, ch2: body.ch2, parecer: parecer, unigep1: body.unigep1,
-      acompanhamentoAnual: body.acompanhamentoAnual,
-      orgao2: r.categoria !== 'SEDF + SEDF' ? orgaoOuUnigep : r.orgao2,
-      unigep2: r.categoria === 'SEDF + SEDF' ? orgaoOuUnigep : r.unigep2
-    });
+    Object.assign(registroAtualFicha, atualizacoesMemoria);
     renderFicha(registroAtualFicha);
     editarPainel.classList.add('hidden');
   } catch (err) {
