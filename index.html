@@ -322,7 +322,6 @@
               <input id="edit-acompanhamento" type="date">
             </div>
           </div>
-          <div style="margin-bottom:12px;"><label>Observação</label><input id="edit-observacao-padrao" type="text"></div>
         </div>
 
         <!-- Contrato Temporário -->
@@ -335,7 +334,6 @@
             <input id="edit-cargo-outro-temp" type="text" placeholder="Cargo do outro vínculo">
             <input id="edit-orgao-outro-temp" type="text" placeholder="Órgão/entidade do outro vínculo">
           </div>
-          <div style="margin-bottom:12px;"><label>Observação</label><input id="edit-observacao-temp" type="text"></div>
         </div>
 
         <!-- SUB JUDICE / CORREGEDORIA -->
@@ -368,7 +366,6 @@
               <option>DILCEIA</option>
             </select>
           </div>
-          <div style="margin-bottom:12px;"><label>Observação</label><input id="edit-observacao-sj" type="text"></div>
         </div>
         <!-- Categorias encerradas: Aposentadoria/Reserva, Pensão, Perda de Objeto -->
         <div id="edit-bloco-encerrado" class="hidden">
@@ -392,10 +389,10 @@
             <div></div>
             <input id="edit-orgao2-enc" type="text" placeholder="Órgão / entidade">
           </div>
-          <div style="margin-bottom:12px;"><label>Observação (motivo, data, órgão pagador da pensão, etc.)</label><input id="edit-observacao-enc" type="text"></div>
         </div>
 
         <div style="margin-bottom:12px;"><label>Último parecer emitido</label><input id="edit-parecer" type="text"></div>
+        <div style="margin-bottom:12px;"><label>Observação</label><input id="edit-observacao" type="text"></div>
         <div style="display:flex; justify-content:flex-end; gap:8px;">
           <button type="button" id="edit-cancelar">Cancelar</button>
           <button type="button" id="edit-salvar" class="primary">Salvar alterações</button>
@@ -1057,7 +1054,7 @@ document.getElementById('ficha-editar-toggle').addEventListener('click', () => {
     document.getElementById('edit-mat-temp').value = r.mat1 || '';
     document.getElementById('edit-cargo-outro-temp').value = r.cargo2 || '';
     document.getElementById('edit-orgao-outro-temp').value = r.orgao2 || '';
-    document.getElementById('edit-observacao-temp').value = r.observacao || '';
+    document.getElementById('edit-observacao').value = r.observacao || '';
   } else if (CATEGORIAS_ENCERRADAS.includes(r.categoria)) {
     editBlocoEncerrado.classList.remove('hidden');
     document.getElementById('edit-cargo1-enc').value = r.cargo1 || '';
@@ -1067,7 +1064,7 @@ document.getElementById('ficha-editar-toggle').addEventListener('click', () => {
     document.getElementById('edit-ch1-enc').value = r.ch1 || '';
     document.getElementById('edit-ch2-enc').value = r.ch2 || '';
     document.getElementById('edit-orgao2-enc').value = r.orgao2 || '';
-    document.getElementById('edit-observacao-enc').value = r.observacao || '';
+    document.getElementById('edit-observacao').value = r.observacao || '';
   } else if (r.categoria === 'SUB JUDICE / CORREGEDORIA') {
     editBlocoSubJudice.classList.remove('hidden');
     document.getElementById('edit-cargo1-sj').value = r.cargo1 || '';
@@ -1078,7 +1075,7 @@ document.getElementById('ficha-editar-toggle').addEventListener('click', () => {
     document.getElementById('edit-ch2-sj').value = r.ch2 || '';
     document.getElementById('edit-unigep1-sj').value = r.unigep1 || '';
     document.getElementById('edit-orgao2-sj').value = r.orgao2 || '';
-    document.getElementById('edit-observacao-sj').value = r.observacao || '';
+    document.getElementById('edit-observacao').value = r.observacao || '';
     selecionarPorTexto('edit-atribuicao-sj', r.atribuicao);
   } else {
     editBlocoPadrao.classList.remove('hidden');
@@ -1091,7 +1088,7 @@ document.getElementById('ficha-editar-toggle').addEventListener('click', () => {
     document.getElementById('edit-unigep1').value = r.unigep1 || '';
     document.getElementById('edit-orgao2').value = r.orgao2 || r.unigep2 || '';
     document.getElementById('edit-acompanhamento').value = brParaDateInput(r.acompanhamentoAnual);
-    document.getElementById('edit-observacao-padrao').value = r.observacao || '';
+    document.getElementById('edit-observacao').value = r.observacao || '';
     selecionarPorTexto('edit-atribuicao', r.atribuicao);
   }
 
@@ -1118,7 +1115,7 @@ document.getElementById('edit-salvar').addEventListener('click', async () => {
       mat1: document.getElementById('edit-mat-temp').value,
       cargo2: document.getElementById('edit-cargo-outro-temp').value,
       orgao2: document.getElementById('edit-orgao-outro-temp').value,
-      observacao: document.getElementById('edit-observacao-temp').value,
+      observacao: document.getElementById('edit-observacao').value,
       parecer: parecer
     };
     atualizacoesMemoria = {
@@ -1136,7 +1133,7 @@ document.getElementById('edit-salvar').addEventListener('click', async () => {
       ch1: document.getElementById('edit-ch1-enc').value,
       ch2: document.getElementById('edit-ch2-enc').value,
       orgao2: document.getElementById('edit-orgao2-enc').value,
-      observacao: document.getElementById('edit-observacao-enc').value,
+      observacao: document.getElementById('edit-observacao').value,
       parecer: parecer
     };
     atualizacoesMemoria = {
@@ -1156,7 +1153,7 @@ document.getElementById('edit-salvar').addEventListener('click', async () => {
       ch2: document.getElementById('edit-ch2-sj').value,
       unigep1: document.getElementById('edit-unigep1-sj').value,
       orgao2: document.getElementById('edit-orgao2-sj').value,
-      observacao: document.getElementById('edit-observacao-sj').value,
+      observacao: document.getElementById('edit-observacao').value,
       atribuicao: document.getElementById('edit-atribuicao-sj').value,
       parecer: parecer
     };
@@ -1180,7 +1177,7 @@ document.getElementById('edit-salvar').addEventListener('click', async () => {
       unigep1: document.getElementById('edit-unigep1').value,
       acompanhamentoAnual: dateInputParaBr(document.getElementById('edit-acompanhamento').value),
       atribuicao: document.getElementById('edit-atribuicao').value,
-      observacao: document.getElementById('edit-observacao-padrao').value,
+      observacao: document.getElementById('edit-observacao').value,
       parecer: parecer
     };
     if (r.categoria === 'SEDF + SEDF') { body.unigep2 = orgaoOuUnigep; }
