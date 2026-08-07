@@ -9,17 +9,19 @@
 <style>
   * { box-sizing: border-box; }
   body { font-family: -apple-system, 'Inter', Arial, sans-serif; background: #F1EFE8; margin: 0; padding: 24px; color: #2C2C2A; }
-  .app { max-width: 1100px; margin: 0 auto; }
+  .app { max-width: 1420px; margin: 0 auto; }
   .layout-duas-colunas { display: flex; gap: 20px; align-items: flex-start; }
   .coluna-principal { flex: 1; min-width: 0; }
   .coluna-dashboard { width: 280px; flex-shrink: 0; position: sticky; top: 20px; }
-  @media (max-width: 900px) {
+  .coluna-diligencias { width: 260px; flex-shrink: 0; position: sticky; top: 20px; }
+  @media (max-width: 1200px) {
     .layout-duas-colunas { flex-direction: column; }
-    .coluna-dashboard { width: 100%; position: static; }
+    .coluna-dashboard, .coluna-diligencias { width: 100%; position: static; }
   }
-  .header { background: #1B3A5C; border-radius: 12px 12px 0 0; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .header { background: #1B3A5C; border-radius: 12px; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; box-shadow: 0 2px 10px rgba(27,58,92,0.18); }
   .header .title { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 19px; color: #F7F5F1; }
   .header .subtitle { margin: 2px 0 0; font-size: 12.5px; color: #B8C4D1; }
+  .bloco-flutuante { border-radius: 12px; box-shadow: 0 4px 16px rgba(27,58,92,0.08); overflow: hidden; }
   .steps { background: #F7F5F1; border: 1px solid #E4E0D4; border-top: none; padding: 22px 28px 8px; display: flex; align-items: center; }
   .step-item { display: flex; align-items: center; gap: 8px; cursor: pointer; }
   .step-circle { width: 26px; height: 26px; border-radius: 50%; background: #D6D0C0; color: #6B6A62; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 500; }
@@ -109,9 +111,20 @@
   </div>
 
   <div class="layout-duas-colunas" style="margin-top:0;">
+
+  <div class="coluna-diligencias">
+    <div class="card bloco-flutuante" style="padding:18px 20px; border:1px solid #E4E0D4; border-radius:12px;">
+      <p style="margin:0 0 2px; font-size:13px; font-weight:500; color:#1B3A5C;"><i class="ti ti-gavel"></i> Diligências CGDF/TCDF</p>
+      <p style="margin:0 0 14px; font-size:10.5px; color:#8A897F;">Processos que você sinalizou, por prazo de vencimento</p>
+      <div id="dilig-loading" style="font-size:12px; color:#6B6A62; padding:8px 0;">Carregando...</div>
+      <div id="dilig-lista"></div>
+    </div>
+  </div>
+
   <div class="coluna-principal">
 
-  <div class="row" style="padding:14px 28px 0; gap:8px; background:#F7F5F1; border:1px solid #E4E0D4; border-bottom:none;">
+  <div class="bloco-flutuante">
+  <div class="row" style="padding:14px 28px 0; gap:8px; background:#F7F5F1; border:1px solid #E4E0D4; border-bottom:none; border-radius:12px 12px 0 0;">
     <button type="button" id="nav-cadastro" class="primary">Cadastro / Busca</button>
     <button type="button" id="nav-relatorios"><i class="ti ti-alert-triangle"></i> Relatórios</button>
   </div>
@@ -309,12 +322,26 @@
     <div id="view-ficha" class="hidden">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
         <button type="button" id="ficha-voltar"><i class="ti ti-arrow-left"></i> Voltar à busca</button>
-        <div style="display:flex; gap:8px;">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button type="button" id="ficha-historico-toggle"><i class="ti ti-history"></i> Histórico</button>
+          <button type="button" id="ficha-diligencia-toggle" style="color:#8B4513; border-color:#8B4513;"><i class="ti ti-gavel"></i> Marcar diligência</button>
           <button type="button" id="ficha-editar-toggle" style="color:#1B3A5C; border-color:#1B3A5C;"><i class="ti ti-pencil"></i> Alterar dados</button>
           <button type="button" id="ficha-migrar-toggle" style="color:#B8862B; border-color:#B8862B;"><i class="ti ti-transfer"></i> Registrar mudança de categoria</button>
           <button type="button" id="ficha-baixar" class="primary"><i class="ti ti-download"></i> Baixar ficha em PDF</button>
         </div>
+      </div>
+
+      <div id="diligencia-painel" class="hidden box" style="margin-bottom:18px; border-color:#D2A679; background:#FBF3E9;">
+        <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#8B4513;">Marcar como diligência CGDF/TCDF</p>
+        <div class="grid2" style="margin-bottom:12px;">
+          <div><label>Prazo de vencimento</label><input id="dilig-prazo" type="date"></div>
+          <div><label>Observação (opcional)</label><input id="dilig-obs" type="text" placeholder="Ex.: Ofício TCDF nº..."></div>
+        </div>
+        <div style="display:flex; justify-content:flex-end; gap:8px;">
+          <button type="button" id="dilig-cancelar">Cancelar</button>
+          <button type="button" id="dilig-salvar" class="gold">Salvar diligência</button>
+        </div>
+        <p id="dilig-resultado" class="hidden" style="margin:12px 0 0; font-size:12.5px; color:#27500A; background:#EAF3DE; border-radius:6px; padding:10px 12px;"></p>
       </div>
 
       <div id="historico-painel" class="hidden box" style="margin-bottom:18px;">
@@ -585,10 +612,11 @@
     </div>
   </div>
 
+  </div> <!-- fecha bloco-flutuante -->
   </div> <!-- fecha coluna-principal -->
 
   <div class="coluna-dashboard">
-    <div class="card" style="padding:18px 20px;">
+    <div class="card bloco-flutuante" style="padding:18px 20px; border:1px solid #E4E0D4; border-radius:12px;">
       <p style="margin:0 0 2px; font-size:13px; font-weight:500; color:#1B3A5C;">Estatística</p>
       <p style="margin:0 0 14px; font-size:10.5px; color:#8A897F;">Atualiza a cada 5 minutos</p>
       <div id="dash-loading" style="font-size:12px; color:#6B6A62; padding:8px 0;">Carregando...</div>
@@ -685,11 +713,13 @@ function entrarNoSistema() {
 
   carregarDashboard();
   carregarAlertaVencendo();
+  carregarDiligencias();
 
-  // Atualiza a coluna de Estatística e o alerta a cada 5 minutos, automaticamente
+  // Atualiza a coluna de Estatística, o alerta e as diligências a cada 5 minutos
   setInterval(() => {
     carregarDashboard();
     carregarAlertaVencendo();
+    carregarDiligencias();
   }, 5 * 60 * 1000);
 }
 
@@ -1151,6 +1181,7 @@ function renderFicha(record) {
   editarPainel.classList.add('hidden');
   editResultado.classList.add('hidden');
   document.getElementById('historico-painel').classList.add('hidden');
+  document.getElementById('diligencia-painel').classList.add('hidden');
   document.getElementById('mig-motivo').value = 'APOSENTADORIA';
   sugerirDestino();
 
@@ -1221,6 +1252,113 @@ document.getElementById('ficha-historico-toggle').addEventListener('click', asyn
     loading.classList.add('hidden');
   }
 });
+
+// ---------------------------------------------------------------------
+// DILIGÊNCIAS CGDF/TCDF
+// ---------------------------------------------------------------------
+document.getElementById('ficha-diligencia-toggle').addEventListener('click', () => {
+  if (!registroAtualFicha) return;
+  document.getElementById('dilig-prazo').value = '';
+  document.getElementById('dilig-obs').value = '';
+  document.getElementById('dilig-resultado').classList.add('hidden');
+  document.getElementById('diligencia-painel').classList.toggle('hidden');
+  document.getElementById('historico-painel').classList.add('hidden');
+  editarPainel.classList.add('hidden');
+  migrarPainel.classList.add('hidden');
+});
+document.getElementById('dilig-cancelar').addEventListener('click', () => {
+  document.getElementById('diligencia-painel').classList.add('hidden');
+});
+document.getElementById('dilig-salvar').addEventListener('click', async () => {
+  if (!registroAtualFicha) return;
+  const prazo = dateInputParaBr(document.getElementById('dilig-prazo').value);
+  if (!prazo) { alert('Informe o prazo de vencimento da diligência.'); return; }
+  const body = {
+    action: 'marcarDiligencia',
+    categoria: registroAtualFicha.categoria,
+    linhaProcesso: registroAtualFicha.linha,
+    processo: registroAtualFicha.processo,
+    nome: registroAtualFicha.nome,
+    prazo: prazo,
+    analista: currentUser ? currentUser.email : '',
+    observacao: document.getElementById('dilig-obs').value,
+    usuario: currentUser ? currentUser.email : ''
+  };
+  const btn = document.getElementById('dilig-salvar');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    const resp = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
+    const data = await resp.json();
+    if (data.erro) throw new Error(data.erro);
+    const resultado = document.getElementById('dilig-resultado');
+    resultado.classList.remove('hidden');
+    resultado.textContent = data.mensagem;
+    carregarDiligencias();
+  } catch (err) {
+    alert('Erro ao salvar diligência: ' + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar diligência';
+  }
+});
+
+function calcularCorDiligencia(prazoBr) {
+  const partes = String(prazoBr || '').split('/');
+  if (partes.length !== 3) return { cor: '#97C459', fundo: '#EAF3DE', texto: '#27500A' };
+  const prazo = new Date(parseInt(partes[2], 10), parseInt(partes[1], 10) - 1, parseInt(partes[0], 10));
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const diasRestantes = Math.round((prazo - hoje) / (1000 * 60 * 60 * 24));
+  if (diasRestantes <= 3) return { cor: '#C0392B', fundo: '#FBEAEA', texto: '#A33', diasRestantes };
+  if (diasRestantes <= 7) return { cor: '#D2691E', fundo: '#FCEBDD', texto: '#B0530F', diasRestantes };
+  if (diasRestantes <= 15) return { cor: '#E8C77A', fundo: '#FAF3E2', texto: '#85560B', diasRestantes };
+  return { cor: '#97C459', fundo: '#EAF3DE', texto: '#27500A', diasRestantes };
+}
+
+async function carregarDiligencias() {
+  if (!currentUser) return;
+  const loading = document.getElementById('dilig-loading');
+  const lista = document.getElementById('dilig-lista');
+  loading.classList.remove('hidden');
+  try {
+    const resp = await fetch(API_URL + '?action=listarDiligencias&analista=' + encodeURIComponent(currentUser.email));
+    const data = await resp.json();
+    if (data.erro) throw new Error(data.erro);
+    const diligencias = data.resultados || [];
+    if (!diligencias.length) {
+      lista.innerHTML = '<p class="muted" style="margin:0; font-size:12px;">Nenhuma diligência sinalizada.</p>';
+      return;
+    }
+    lista.innerHTML = diligencias.map(d => {
+      const c = calcularCorDiligencia(d.prazo);
+      const diasTexto = c.diasRestantes < 0 ? 'venceu há ' + Math.abs(c.diasRestantes) + ' dia(s)' : c.diasRestantes + ' dia(s) restante(s)';
+      return '<div class="dilig-card" data-linha="' + d.linhaDiligencia + '" style="border:1px solid ' + c.cor + '; background:' + c.fundo + '; border-radius:8px; padding:10px 12px; margin-bottom:8px; cursor:pointer;">' +
+        '<p style="margin:0; font-size:12.5px; font-weight:500; color:' + c.texto + ';">' + esc(d.nome) + '</p>' +
+        '<p style="margin:2px 0 0; font-size:11px; color:' + c.texto + ';">Processo ' + esc(d.processo) + '</p>' +
+        '<p style="margin:4px 0 0; font-size:11px; color:' + c.texto + '; font-weight:500;">Prazo: ' + esc(d.prazo) + ' · ' + diasTexto + '</p>' +
+        '<p style="margin:6px 0 0; font-size:10.5px; color:' + c.texto + '; text-decoration:underline; cursor:pointer;" class="dilig-concluir">Marcar como concluída</p>' +
+        '</div>';
+    }).join('');
+    lista.querySelectorAll('.dilig-concluir').forEach(el => {
+      el.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const card = e.target.closest('.dilig-card');
+        const linhaDiligencia = card.getAttribute('data-linha');
+        if (!confirm('Marcar esta diligência como concluída?')) return;
+        try {
+          await fetch(API_URL, {
+            method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'concluirDiligencia', linhaDiligencia: linhaDiligencia, usuario: currentUser ? currentUser.email : '' })
+          });
+          carregarDiligencias();
+        } catch (err) { alert('Erro ao concluir: ' + err.message); }
+      });
+    });
+  } catch (err) {
+    lista.innerHTML = '<p style="margin:0; font-size:12px; color:#A33;">Erro ao carregar diligências.</p>';
+  } finally {
+    loading.classList.add('hidden');
+  }
+}
 
 const editarPainel = document.getElementById('editar-painel');
 const editResultado = document.getElementById('edit-resultado');
