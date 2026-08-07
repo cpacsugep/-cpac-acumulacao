@@ -85,11 +85,11 @@
       <p class="subtitle">SEEDF · Comissão Permanente de Acumulação de Cargos</p>
     </div>
     <div style="display:flex; align-items:center; gap:16px;">
-      <div id="alerta-sino" style="position:relative; cursor:pointer;" title="Processos sem parecer emitido">
-        <i class="ti ti-bell" style="font-size:22px; color:#E8C77A;"></i>
-        <span id="alerta-badge" class="hidden" style="position:absolute; top:-6px; right:-8px; background:#C0392B; color:#fff; font-size:10px; font-weight:600; border-radius:10px; padding:1px 5px; min-width:16px; text-align:center;">0</span>
-        <div id="alerta-painel" class="hidden" style="position:absolute; top:32px; right:-8px; background:#FFFFFF; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.2); padding:14px 16px; width:280px; z-index:500; text-align:left; cursor:default;">
-          <p style="margin:0 0 8px; font-size:13px; font-weight:500; color:#1B3A5C;">Processos sem parecer emitido</p>
+      <div id="alerta-sino" style="position:relative; cursor:pointer; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center;" title="Processos vencendo em breve">
+        <i class="ti ti-bell" style="font-size:19px; color:#F7F5F1;"></i>
+        <span id="alerta-badge" class="hidden" style="position:absolute; top:-4px; right:-4px; background:#C0392B; color:#fff; font-size:10px; font-weight:600; border-radius:10px; padding:1px 5px; min-width:16px; text-align:center; box-shadow:0 0 0 2px #1B3A5C;">0</span>
+        <div id="alerta-painel" class="hidden" style="position:absolute; top:42px; right:-8px; background:#FFFFFF; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.2); padding:14px 16px; width:280px; z-index:500; text-align:left; cursor:default;">
+          <p style="margin:0 0 8px; font-size:13px; font-weight:500; color:#1B3A5C;">Processos vencendo em breve</p>
           <div id="alerta-lista" style="font-size:12px; color:#4A4943; max-height:220px; overflow-y:auto;"></div>
         </div>
       </div>
@@ -102,12 +102,12 @@
   </div>
 
   <div class="row" style="padding:14px 28px 0; gap:8px; background:#F7F5F1; border:1px solid #E4E0D4; border-bottom:none;">
-    <button type="button" id="nav-dashboard" class="primary"><i class="ti ti-layout-dashboard"></i> Início</button>
-    <button type="button" id="nav-cadastro">Cadastro / Busca</button>
+    <button type="button" id="nav-cadastro" class="primary">Cadastro / Busca</button>
     <button type="button" id="nav-relatorios"><i class="ti ti-alert-triangle"></i> Relatórios</button>
+    <button type="button" id="nav-dashboard"><i class="ti ti-chart-bar"></i> Estatística</button>
   </div>
 
-  <div id="area-dashboard">
+  <div id="area-dashboard" class="hidden">
     <div class="card" style="border-radius:0 0 12px 12px;">
       <h2 class="section-title">Visão geral</h2>
       <p class="section-sub">Resumo rápido da situação atual da CPAC.</p>
@@ -125,7 +125,7 @@
     </div>
   </div>
 
-  <div id="area-cadastro" class="hidden">
+  <div id="area-cadastro">
   <div class="steps">
     <div class="step-item" data-step="1"><div class="step-circle active" data-circle="1">1</div><span class="step-label active" data-label="1">Servidor e cargos</span></div>
     <div class="step-line"></div>
@@ -536,14 +536,16 @@
         <h2 class="section-title">Relatório de acompanhamento anual</h2>
         <p class="section-sub">Processos das categorias SEDF + SEDF e SEDF + OUTRO que estão atrasados ou perto de vencer o prazo legal de reavaliação anual da compatibilidade.</p>
 
-        <div class="row" style="align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
-          <button type="button" id="rel-gerar" class="primary"><i class="ti ti-refresh"></i> Gerar relatório</button>
-          <button type="button" id="rel-exportar"><i class="ti ti-download"></i> Exportar CSV</button>
-          <div style="display:flex; gap:4px; background:#F1EFE8; padding:4px; border-radius:8px;">
-            <button type="button" class="rel-filtro-btn primary" data-filtro="todos" style="border:none; font-size:12px; padding:6px 12px;">Todos</button>
-            <button type="button" class="rel-filtro-btn" data-filtro="ATRASADO" style="border:none; font-size:12px; padding:6px 12px;">Atrasados</button>
-            <button type="button" class="rel-filtro-btn" data-filtro="VENCENDO EM BREVE" style="border:none; font-size:12px; padding:6px 12px;">Vencendo em breve</button>
+        <div class="row" style="align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+          <div class="row" style="align-items:center; gap:10px;">
+            <button type="button" id="rel-gerar" class="primary"><i class="ti ti-refresh"></i> Gerar relatório</button>
+            <div style="display:flex; gap:4px; background:#F1EFE8; padding:4px; border-radius:8px;">
+              <button type="button" class="rel-filtro-btn primary" data-filtro="todos" style="border:none; font-size:12px; padding:6px 12px;">Todos</button>
+              <button type="button" class="rel-filtro-btn" data-filtro="ATRASADO" style="border:none; font-size:12px; padding:6px 12px;">Atrasados</button>
+              <button type="button" class="rel-filtro-btn" data-filtro="VENCENDO EM BREVE" style="border:none; font-size:12px; padding:6px 12px;">Vencendo em breve</button>
+            </div>
           </div>
+          <button type="button" id="rel-exportar" style="font-size:12px; padding:6px 12px;"><i class="ti ti-download"></i> Exportar CSV</button>
         </div>
 
         <div id="rel-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Consultando planilha...</div>
@@ -685,7 +687,7 @@ function entrarNoSistema() {
   document.getElementById('nav-relatorios').classList.toggle('hidden', !podeVerRelatorios);
 
   carregarDashboard();
-  carregarAlertaSemParecer();
+  carregarAlertaVencendo();
 }
 
 document.getElementById('logout-link').addEventListener('click', () => {
@@ -1685,23 +1687,24 @@ async function carregarDashboard() {
 // ---------------------------------------------------------------------
 // ALERTA: processos sem parecer emitido (sino no cabeçalho)
 // ---------------------------------------------------------------------
-async function carregarAlertaSemParecer() {
+async function carregarAlertaVencendo() {
   try {
-    const resp = await fetch(API_URL + '?action=relatorioSemParecer');
+    const resp = await fetch(API_URL + '?action=relatorioAtrasados');
     const data = await resp.json();
     if (data.erro) return;
+    const vencendo = (data.resultados || []).filter(r => r.situacao === 'VENCENDO EM BREVE');
     const badge = document.getElementById('alerta-badge');
     const lista = document.getElementById('alerta-lista');
-    if (data.total > 0) {
-      badge.textContent = data.total > 99 ? '99+' : data.total;
+    if (vencendo.length > 0) {
+      badge.textContent = vencendo.length > 99 ? '99+' : vencendo.length;
       badge.classList.remove('hidden');
     } else {
       badge.classList.add('hidden');
     }
-    lista.innerHTML = data.resultados.slice(0, 15).map(r =>
-      '<div style="padding:6px 0; border-bottom:1px solid #E4E0D4;"><strong>' + esc(r.nome) + '</strong><br><span style="color:#8A897F;">' + esc(r.categoria) + ' · ' + esc(r.processo || 's/nº') + '</span></div>'
-    ).join('') || '<p class="muted" style="margin:0;">Nenhum processo sem parecer. 🎉</p>';
-    if (data.total > 15) lista.innerHTML += '<p style="margin:8px 0 0; font-size:11.5px; color:#8A897F;">+ ' + (data.total - 15) + ' outro(s)...</p>';
+    lista.innerHTML = vencendo.slice(0, 15).map(r =>
+      '<div style="padding:6px 0; border-bottom:1px solid #E4E0D4;"><strong>' + esc(r.nome) + '</strong><br><span style="color:#8A897F;">' + esc(r.categoria) + ' · vence ' + esc(r.dataAcompanhamento) + '</span></div>'
+    ).join('') || '<p class="muted" style="margin:0;">Nenhum processo vencendo em breve. 🎉</p>';
+    if (vencendo.length > 15) lista.innerHTML += '<p style="margin:8px 0 0; font-size:11.5px; color:#8A897F;">+ ' + (vencendo.length - 15) + ' outro(s)...</p>';
   } catch (err) {}
 }
 document.getElementById('alerta-sino').addEventListener('click', (e) => {
