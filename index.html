@@ -57,13 +57,13 @@
     <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:14px;">
       <i class="ti ti-alert-triangle" style="font-size:22px; color:#B8862B; margin-top:2px;"></i>
       <div>
-        <p style="margin:0; font-size:15px; font-weight:500; color:#1B3A5C;">Possível cadastro duplicado</p>
-        <p style="margin:4px 0 0; font-size:12.5px; color:#6B6A62;">Encontramos registro(s) parecido(s) nesta categoria:</p>
+        <p id="dup-modal-titulo" style="margin:0; font-size:15px; font-weight:500; color:#1B3A5C;">Possível cadastro duplicado</p>
+        <p id="dup-modal-subtitulo" style="margin:4px 0 0; font-size:12.5px; color:#6B6A62;">Encontramos registro(s) parecido(s) nesta categoria:</p>
       </div>
     </div>
     <div id="dup-modal-lista" style="background:#F7F5F1; border-radius:8px; padding:12px 14px; font-size:12.5px; color:#2C2C2A; line-height:1.8; margin-bottom:20px; max-height:220px; overflow-y:auto;"></div>
     <div style="display:flex; justify-content:flex-end; gap:8px;">
-      <button type="button" id="dup-modal-cancelar">Cancelar cadastro</button>
+      <button type="button" id="dup-modal-cancelar">Cancelar</button>
       <button type="button" id="dup-modal-continuar" class="gold">Continuar mesmo assim</button>
     </div>
   </div>
@@ -84,19 +84,48 @@
       <p class="title">CPAC Digital</p>
       <p class="subtitle">SEEDF · Comissão Permanente de Acumulação de Cargos</p>
     </div>
-    <div style="text-align:right; border-left:1px solid #3A567A; padding-left:16px;">
-      <p style="margin:0; font-size:10.5px; color:#8FA3B8; text-transform:uppercase;">Conectado como</p>
-      <p id="usuario-logado" style="margin:2px 0 0; font-size:12.5px; color:#E8C77A;">—</p>
-      <p id="logout-link" style="margin:4px 0 0; font-size:11px; color:#B8C4D1; cursor:pointer; text-decoration:underline;">Sair</p>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <div id="alerta-sino" style="position:relative; cursor:pointer;" title="Processos sem parecer emitido">
+        <i class="ti ti-bell" style="font-size:22px; color:#E8C77A;"></i>
+        <span id="alerta-badge" class="hidden" style="position:absolute; top:-6px; right:-8px; background:#C0392B; color:#fff; font-size:10px; font-weight:600; border-radius:10px; padding:1px 5px; min-width:16px; text-align:center;">0</span>
+        <div id="alerta-painel" class="hidden" style="position:absolute; top:32px; right:-8px; background:#FFFFFF; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.2); padding:14px 16px; width:280px; z-index:500; text-align:left; cursor:default;">
+          <p style="margin:0 0 8px; font-size:13px; font-weight:500; color:#1B3A5C;">Processos sem parecer emitido</p>
+          <div id="alerta-lista" style="font-size:12px; color:#4A4943; max-height:220px; overflow-y:auto;"></div>
+        </div>
+      </div>
+      <div style="text-align:right; border-left:1px solid #3A567A; padding-left:16px;">
+        <p style="margin:0; font-size:10.5px; color:#8FA3B8; text-transform:uppercase;">Conectado como</p>
+        <p id="usuario-logado" style="margin:2px 0 0; font-size:12.5px; color:#E8C77A;">—</p>
+        <p id="logout-link" style="margin:4px 0 0; font-size:11px; color:#B8C4D1; cursor:pointer; text-decoration:underline;">Sair</p>
+      </div>
     </div>
   </div>
 
   <div class="row" style="padding:14px 28px 0; gap:8px; background:#F7F5F1; border:1px solid #E4E0D4; border-bottom:none;">
-    <button type="button" id="nav-cadastro" class="primary">Cadastro / Busca</button>
+    <button type="button" id="nav-dashboard" class="primary"><i class="ti ti-layout-dashboard"></i> Início</button>
+    <button type="button" id="nav-cadastro">Cadastro / Busca</button>
     <button type="button" id="nav-relatorios"><i class="ti ti-alert-triangle"></i> Relatórios</button>
   </div>
 
-  <div id="area-cadastro">
+  <div id="area-dashboard">
+    <div class="card" style="border-radius:0 0 12px 12px;">
+      <h2 class="section-title">Visão geral</h2>
+      <p class="section-sub">Resumo rápido da situação atual da CPAC.</p>
+      <div id="dash-loading" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Carregando...</div>
+      <div id="dash-conteudo" class="hidden">
+        <div class="row" style="gap:12px; flex-wrap:wrap; margin-bottom:20px;">
+          <div class="box" style="flex:1; min-width:140px; text-align:center; border-color:#97C459; background:#EAF3DE;"><p id="dash-total" style="margin:0; font-size:26px; font-weight:600; color:#27500A;">—</p><p style="margin:2px 0 0; font-size:11.5px; color:#3B6D11;">Processos catalogados</p></div>
+          <div class="box" style="flex:1; min-width:140px; text-align:center; border-color:#D98C8C; background:#FBEAEA;"><p id="dash-atrasados" style="margin:0; font-size:26px; font-weight:600; color:#A33;">—</p><p style="margin:2px 0 0; font-size:11.5px; color:#8A3A3A;">Atrasados</p></div>
+          <div class="box" style="flex:1; min-width:140px; text-align:center; border-color:#E8C77A; background:#FAF3E2;"><p id="dash-vencendo" style="margin:0; font-size:26px; font-weight:600; color:#85560B;">—</p><p style="margin:2px 0 0; font-size:11.5px; color:#85560B;">Vencendo em breve</p></div>
+          <div class="box" style="flex:1; min-width:140px; text-align:center; border-color:#C9C7BC; background:#F1EFE8;"><p id="dash-sem-parecer" style="margin:0; font-size:26px; font-weight:600; color:#4A4943;">—</p><p style="margin:2px 0 0; font-size:11.5px; color:#6B6A62;">Sem parecer emitido</p></div>
+        </div>
+        <p style="margin:0 0 8px; font-size:13px; font-weight:500; color:#1B3A5C;">Processos por categoria</p>
+        <div id="dash-por-categoria"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="area-cadastro" class="hidden">
   <div class="steps">
     <div class="step-item" data-step="1"><div class="step-circle active" data-circle="1">1</div><span class="step-label active" data-label="1">Servidor e cargos</span></div>
     <div class="step-line"></div>
@@ -125,6 +154,19 @@
     <div id="view-cadastro" class="hidden">
       <h2 class="section-title">Cadastrar acumulação</h2>
       <p class="section-sub">Grava direto na planilha da CPAC.</p>
+
+      <div id="rascunho-aviso" class="hidden warn-box" style="margin-bottom:18px;">
+        <i class="ti ti-file-alert" style="font-size:18px; color:#85560B;"></i>
+        <div style="flex:1;">
+          <p style="margin:0; font-size:13px; color:#633806; font-weight:500;">Encontramos um cadastro não finalizado</p>
+          <p style="margin:4px 0 10px; font-size:12.5px; color:#854F0B;">Parece que você começou um cadastro e não chegou a salvar. Quer continuar de onde parou?</p>
+          <div style="display:flex; gap:8px;">
+            <button type="button" id="rascunho-aplicar" class="gold" style="font-size:12px; padding:6px 12px;">Continuar rascunho</button>
+            <button type="button" id="rascunho-descartar" style="font-size:12px; padding:6px 12px;">Descartar</button>
+          </div>
+        </div>
+      </div>
+
       <div style="margin-bottom:18px;"><label>Nome completo</label><input id="cad-nome" type="text"></div>
       <div style="margin-bottom:18px;"><label>Número do processo</label><input id="cad-processo" type="text" placeholder="00080-00000000/2026-00"></div>
       <div style="margin-bottom:18px;"><label>Último parecer emitido (se já houver)</label><input id="cad-parecer" type="text" placeholder="Ex.: PARECER SEI-GDF N.º 000/2026"></div>
@@ -277,10 +319,17 @@
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
         <button type="button" id="ficha-voltar"><i class="ti ti-arrow-left"></i> Voltar à busca</button>
         <div style="display:flex; gap:8px;">
+          <button type="button" id="ficha-historico-toggle"><i class="ti ti-history"></i> Histórico</button>
           <button type="button" id="ficha-editar-toggle" style="color:#1B3A5C; border-color:#1B3A5C;"><i class="ti ti-pencil"></i> Alterar dados</button>
           <button type="button" id="ficha-migrar-toggle" style="color:#B8862B; border-color:#B8862B;"><i class="ti ti-transfer"></i> Registrar mudança de categoria</button>
           <button type="button" id="ficha-baixar" class="primary"><i class="ti ti-download"></i> Baixar ficha em PDF</button>
         </div>
+      </div>
+
+      <div id="historico-painel" class="hidden box" style="margin-bottom:18px;">
+        <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Histórico de alterações</p>
+        <div id="historico-loading" style="font-size:12.5px; color:#6B6A62;">Consultando...</div>
+        <div id="historico-lista"></div>
       </div>
 
       <div id="editar-painel" class="hidden box" style="margin-bottom:18px;">
@@ -479,6 +528,7 @@
         <button type="button" id="subnav-acompanhamento" class="primary" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-calendar-due"></i> Acompanhamento anual</button>
         <button type="button" id="subnav-contagem" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-calculator"></i> Contagem de processos</button>
         <button type="button" id="subnav-analista" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-user"></i> Por analista</button>
+        <button type="button" id="subnav-sem-parecer" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-file-off"></i> Sem parecer</button>
       </div>
 
       <!-- SUB-ABA: ACOMPANHAMENTO ANUAL -->
@@ -488,6 +538,7 @@
 
         <div class="row" style="align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
           <button type="button" id="rel-gerar" class="primary"><i class="ti ti-refresh"></i> Gerar relatório</button>
+          <button type="button" id="rel-exportar"><i class="ti ti-download"></i> Exportar CSV</button>
           <div style="display:flex; gap:4px; background:#F1EFE8; padding:4px; border-radius:8px;">
             <button type="button" class="rel-filtro-btn primary" data-filtro="todos" style="border:none; font-size:12px; padding:6px 12px;">Todos</button>
             <button type="button" class="rel-filtro-btn" data-filtro="ATRASADO" style="border:none; font-size:12px; padding:6px 12px;">Atrasados</button>
@@ -531,11 +582,27 @@
             <option value="DILCEIA">DILCEIA</option>
           </select>
           <button type="button" id="analista-gerar" class="primary"><i class="ti ti-refresh"></i> Gerar</button>
+          <button type="button" id="analista-exportar"><i class="ti ti-download"></i> Exportar CSV</button>
         </div>
 
         <div id="analista-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Consultando planilha...</div>
         <div id="analista-resumo"></div>
         <div id="analista-tabela"></div>
+      </div>
+
+      <!-- SUB-ABA: SEM PARECER -->
+      <div id="subview-sem-parecer" class="hidden">
+        <h2 class="section-title">Processos sem parecer emitido</h2>
+        <p class="section-sub">Todas as categorias, todos os processos que ainda não têm um parecer registrado.</p>
+
+        <div class="row" style="margin-bottom:18px; gap:10px;">
+          <button type="button" id="semparecer-gerar" class="primary"><i class="ti ti-refresh"></i> Gerar</button>
+          <button type="button" id="semparecer-exportar"><i class="ti ti-download"></i> Exportar CSV</button>
+        </div>
+
+        <div id="semparecer-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Consultando planilha...</div>
+        <div id="semparecer-resumo"></div>
+        <div id="semparecer-tabela"></div>
       </div>
 
     </div>
@@ -616,6 +683,9 @@ function entrarNoSistema() {
 
   const podeVerRelatorios = EMAILS_RELATORIOS.some(e => e.toLowerCase() === currentUser.email.toLowerCase());
   document.getElementById('nav-relatorios').classList.toggle('hidden', !podeVerRelatorios);
+
+  carregarDashboard();
+  carregarAlertaSemParecer();
 }
 
 document.getElementById('logout-link').addEventListener('click', () => {
@@ -702,17 +772,36 @@ function buildCargos(r) {
   return cargos;
 }
 
+function calcularSituacaoUrgencia(dataBr) {
+  if (!dataBr) return null; // categoria sem essa coluna, ou data não preenchida
+  const partes = String(dataBr).split('/');
+  if (partes.length !== 3) return null;
+  const dataAlvo = new Date(parseInt(partes[2], 10), parseInt(partes[1], 10) - 1, parseInt(partes[0], 10));
+  if (isNaN(dataAlvo.getTime())) return null;
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const diasDiferenca = Math.round((hoje - dataAlvo) / (1000 * 60 * 60 * 24));
+  if (diasDiferenca > 0) return 'ATRASADO';
+  if (diasDiferenca >= -30) return 'VENCENDO EM BREVE';
+  return 'EM DIA';
+}
+
 function renderSearchResult(records, value) {
   if (records.length) {
     searchResult.innerHTML = '<p style="margin:0 0 8px; font-size:12px; color:#6B6A62;">' + records.length + ' resultado(s) encontrado(s):</p>';
     records.forEach((record) => {
       const card = document.createElement('div');
-      card.className = 'result-card';
+      const situacao = calcularSituacaoUrgencia(record.acompanhamentoAnual);
+      let corBorda = '#97C459', corFundo = '#EAF3DE', corTexto = '#27500A', corTextoSub = '#3B6D11';
+      if (situacao === 'ATRASADO') { corBorda = '#D98C8C'; corFundo = '#FBEAEA'; corTexto = '#A33'; corTextoSub = '#8A3A3A'; }
+      else if (situacao === 'VENCENDO EM BREVE') { corBorda = '#E8C77A'; corFundo = '#FAF3E2'; corTexto = '#85560B'; corTextoSub = '#85560B'; }
+      card.style.cssText = 'border:1px solid ' + corBorda + '; background:' + corFundo + '; border-radius:8px; padding:14px 16px; margin-bottom:8px;';
       const badge = '<span class="badge">' + esc(record.categoria) + '</span>';
+      const badgeSituacao = situacao ? '<span style="font-size:10.5px; text-transform:uppercase; color:' + corTexto + '; background:#FFFFFF; padding:2px 8px; border-radius:10px; margin-left:6px;">' + situacao + '</span>' : '';
       card.innerHTML =
         '<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">' +
-        '<p style="margin:0; font-size:13px; font-weight:500; color:#27500A;">' + esc(record.nome) + '</p>' + badge + '</div>' +
-        '<p style="margin:0 0 8px; font-size:12px; color:#3B6D11;">Processo ' + esc(record.processo) + ' · linha ' + esc(record.linha) + '</p>' +
+        '<p style="margin:0; font-size:13px; font-weight:500; color:' + corTexto + ';">' + esc(record.nome) + '</p><span>' + badge + badgeSituacao + '</span></div>' +
+        '<p style="margin:0 0 8px; font-size:12px; color:' + corTextoSub + ';">Processo ' + esc(record.processo) + ' · linha ' + esc(record.linha) + '</p>' +
         '<div class="cargos-list" style="margin-bottom:10px;"></div>' +
         '<div style="display:flex; justify-content:flex-end; gap:8px;">' +
         '<button type="button" class="ver-ficha outline-blue"><i class="ti ti-file-text"></i> Ver ficha completa</button>' +
@@ -721,7 +810,7 @@ function renderSearchResult(records, value) {
       const list = card.querySelector('.cargos-list');
       buildCargos(record).forEach(c => {
         const row = document.createElement('div');
-        row.style.cssText = 'font-size:12px; color:#3B6D11; padding:2px 0;';
+        row.style.cssText = 'font-size:12px; color:' + corTextoSub + '; padding:2px 0;';
         row.textContent = c.label + (c.ch ? ' · CH ' + c.ch : '') + (c.mat ? ' · mat. ' + c.mat : '');
         list.appendChild(row);
       });
@@ -756,6 +845,58 @@ document.getElementById('search-btn').addEventListener('click', async () => {
 });
 searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('search-btn').click(); });
 
+// ---------------------------------------------------------------------
+// RASCUNHO AUTOMÁTICO: salva o progresso do cadastro no navegador, para
+// não perder tudo se a aba for fechada sem salvar. Some quando cadastra
+// com sucesso, quando cancela, ou quando é limpo manualmente.
+// ---------------------------------------------------------------------
+const CAMPOS_RASCUNHO = [
+  'cad-nome', 'cad-processo', 'cad-parecer', 'cad-categoria',
+  'cad-cargo1', 'cad-mat1', 'cad-ch1', 'cad-unigep1',
+  'cad-cargo2', 'cad-mat2', 'cad-ch2', 'cad-unigep2', 'cad-orgao2',
+  'cad-ano-temp', 'cad-mat-temp', 'cad-cargo-outro-temp', 'cad-orgao-outro-temp',
+  'cad-cargo1-enc', 'cad-mat1-enc', 'cad-ch1-enc', 'cad-cargo2-enc', 'cad-mat2-enc',
+  'cad-ch2-enc', 'cad-orgao2-enc', 'cad-observacao-enc',
+  'cad-acompanhamento', 'cad-observacao-padrao', 'cad-atribuicao'
+];
+const CHAVE_RASCUNHO = 'cpac_rascunho_cadastro';
+
+function salvarRascunho() {
+  const dados = {};
+  CAMPOS_RASCUNHO.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) dados[id] = el.value;
+  });
+  try { localStorage.setItem(CHAVE_RASCUNHO, JSON.stringify(dados)); } catch (e) {}
+}
+
+function limparRascunho() {
+  try { localStorage.removeItem(CHAVE_RASCUNHO); } catch (e) {}
+  document.getElementById('rascunho-aviso').classList.add('hidden');
+}
+
+function restaurarRascunhoSeExistir() {
+  let dados;
+  try { dados = JSON.parse(localStorage.getItem(CHAVE_RASCUNHO) || 'null'); } catch (e) { dados = null; }
+  if (!dados) return;
+  document.getElementById('rascunho-aviso').classList.remove('hidden');
+  document.getElementById('rascunho-aplicar').onclick = () => {
+    Object.keys(dados).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = dados[id];
+    });
+    if (document.getElementById('cad-categoria').value) atualizarCampoVinculo2();
+    document.getElementById('rascunho-aviso').classList.add('hidden');
+  };
+  document.getElementById('rascunho-descartar').onclick = limparRascunho;
+}
+
+let timeoutRascunho = null;
+function agendarSalvamentoRascunho() {
+  clearTimeout(timeoutRascunho);
+  timeoutRascunho = setTimeout(salvarRascunho, 800);
+}
+
 function resetFormularioCadastro() {
   ['cad-nome', 'cad-processo', 'cad-parecer', 'cad-cargo1', 'cad-mat1',
    'cad-cargo2', 'cad-mat2', 'cad-orgao2', 'cad-ano-temp', 'cad-mat-temp',
@@ -773,16 +914,21 @@ function resetFormularioCadastro() {
   atualizarCampoVinculo2();
 }
 
+// Liga o salvamento automático em todo campo de texto/seleção do cadastro
+document.getElementById('view-cadastro').addEventListener('input', agendarSalvamentoRascunho);
+document.getElementById('view-cadastro').addEventListener('change', agendarSalvamentoRascunho);
+
 document.getElementById('go-cadastro-always').addEventListener('click', () => {
   resetFormularioCadastro();
   document.getElementById('cad-nome').value = searchInput.value.trim();
   showView('view-cadastro');
+  restaurarRascunhoSeExistir();
 });
 
 // ---------------------------------------------------------------------
 // CADASTRO REAL (fetch POST na API)
 // ---------------------------------------------------------------------
-document.getElementById('cad-cancel').addEventListener('click', () => showView('view-search'));
+document.getElementById('cad-cancel').addEventListener('click', () => { limparRascunho(); showView('view-search'); });
 
 const cadCategoria = document.getElementById('cad-categoria');
 const cadUnigep2 = document.getElementById('cad-unigep2');
@@ -846,12 +992,18 @@ atualizarCampoVinculo2();
 
 function normalizeCodeClient(s) { return (s || '').toString().toLowerCase().replace(/[^a-z0-9]/g, ''); }
 
-function mostrarModalDuplicidade(detalhesHtml) {
+function mostrarModalDuplicidade(detalhesHtml, opcoes) {
+  opcoes = opcoes || {};
   return new Promise(resolve => {
     const overlay = document.getElementById('dup-modal-overlay');
     const lista = document.getElementById('dup-modal-lista');
     const btnCancelar = document.getElementById('dup-modal-cancelar');
     const btnContinuar = document.getElementById('dup-modal-continuar');
+
+    document.getElementById('dup-modal-titulo').textContent = opcoes.titulo || 'Possível cadastro duplicado';
+    document.getElementById('dup-modal-subtitulo').textContent = opcoes.subtitulo || 'Encontramos registro(s) parecido(s) nesta categoria:';
+    btnCancelar.textContent = opcoes.textoCancelar || 'Cancelar';
+    btnContinuar.textContent = opcoes.textoContinuar || 'Continuar mesmo assim';
 
     lista.innerHTML = detalhesHtml;
     overlay.classList.remove('hidden');
@@ -970,9 +1122,11 @@ document.getElementById('cad-salvar').addEventListener('click', async () => {
   const btn = document.getElementById('cad-salvar');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
+    body.usuario = currentUser ? currentUser.email : '';
     const resp = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
     const data = await resp.json();
     if (data.erro) throw new Error(data.erro);
+    limparRascunho();
     showView('view-search');
     searchResult.innerHTML = '<div class="result-card"><p style="margin:0; font-size:13px; font-weight:500; color:#27500A;"><i class="ti ti-check"></i> ' + esc(data.mensagem) + '</p></div>';
   } catch (err) {
@@ -991,6 +1145,7 @@ function renderFicha(record) {
   migResultado.classList.add('hidden');
   editarPainel.classList.add('hidden');
   editResultado.classList.add('hidden');
+  document.getElementById('historico-painel').classList.add('hidden');
   document.getElementById('mig-motivo').value = 'APOSENTADORIA';
   sugerirDestino();
 
@@ -1031,6 +1186,36 @@ function renderFicha(record) {
 
 document.getElementById('ficha-voltar').addEventListener('click', () => showView('view-search'));
 document.getElementById('ficha-baixar').addEventListener('click', () => window.print());
+
+document.getElementById('ficha-historico-toggle').addEventListener('click', async () => {
+  if (!registroAtualFicha) return;
+  const painel = document.getElementById('historico-painel');
+  const loading = document.getElementById('historico-loading');
+  const lista = document.getElementById('historico-lista');
+  painel.classList.toggle('hidden');
+  if (painel.classList.contains('hidden')) return;
+
+  loading.classList.remove('hidden');
+  lista.innerHTML = '';
+  try {
+    const resp = await fetch(API_URL + '?action=logProcesso&processo=' + encodeURIComponent(registroAtualFicha.processo || ''));
+    const data = await resp.json();
+    if (data.erro) throw new Error(data.erro);
+    if (!data.resultados || !data.resultados.length) {
+      lista.innerHTML = '<p class="muted" style="margin:0; font-size:12.5px;">Nenhum histórico registrado para este processo ainda (registros anteriores à implementação do log não aparecem aqui).</p>';
+      return;
+    }
+    lista.innerHTML = data.resultados.map(h =>
+      '<div style="padding:8px 0; border-top:1px solid #E4E0D4; font-size:12.5px;">' +
+      '<strong>' + esc(h.acao) + '</strong> · ' + esc(h.dataHora) + ' · ' + esc(h.usuario) + '<br>' +
+      '<span style="color:#6B6A62;">' + esc(h.detalhes) + '</span></div>'
+    ).join('');
+  } catch (err) {
+    lista.innerHTML = '<p style="margin:0; font-size:12.5px; color:#A33;">Erro ao consultar histórico: ' + esc(err.message) + '</p>';
+  } finally {
+    loading.classList.add('hidden');
+  }
+});
 
 const editarPainel = document.getElementById('editar-painel');
 const editResultado = document.getElementById('edit-resultado');
@@ -1195,6 +1380,7 @@ document.getElementById('edit-salvar').addEventListener('click', async () => {
   const btn = document.getElementById('edit-salvar');
   btn.disabled = true; btn.textContent = 'Salvando...';
   try {
+    body.usuario = currentUser ? currentUser.email : '';
     const resp = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
     const data = await resp.json();
     if (data.erro) throw new Error(data.erro);
@@ -1230,19 +1416,40 @@ document.getElementById('mig-confirmar').addEventListener('click', async () => {
   const obsComUsuario = obsBase
     ? obsBase + ' | Registrado por: ' + (currentUser ? currentUser.nome : 'desconhecido')
     : 'Registrado por: ' + (currentUser ? currentUser.nome : 'desconhecido');
+  const categoriaDestino = document.getElementById('mig-destino').value;
+  const motivo = document.getElementById('mig-motivo').value;
+  const dataFato = document.getElementById('mig-data-fato').value.trim();
+
+  const resumoHtml =
+    '<div style="margin-bottom:6px;"><strong>Servidor:</strong> ' + esc(registroAtualFicha.nome) + '</div>' +
+    '<div style="margin-bottom:6px;"><strong>De:</strong> ' + esc(registroAtualFicha.categoria) + '</div>' +
+    '<div style="margin-bottom:6px;"><strong>Para:</strong> ' + esc(categoriaDestino) + '</div>' +
+    '<div style="margin-bottom:6px;"><strong>Motivo:</strong> ' + esc(motivo) + '</div>' +
+    (dataFato ? '<div style="margin-bottom:6px;"><strong>Data do fato:</strong> ' + esc(dataFato) + '</div>' : '') +
+    '<div style="margin-top:10px; color:#A33;"><i class="ti ti-alert-circle"></i> Esta ação apaga a linha da aba de origem — não é possível desfazer automaticamente.</div>';
+
+  const confirmado = await mostrarModalDuplicidade(resumoHtml, {
+    titulo: 'Confirmar migração de categoria',
+    subtitulo: 'Revise os dados antes de confirmar:',
+    textoCancelar: 'Cancelar',
+    textoContinuar: 'Confirmar migração'
+  });
+  if (!confirmado) return;
+
   const body = {
     action: 'migrar',
     categoriaOrigem: registroAtualFicha.categoria,
     linha: registroAtualFicha.linha,
-    categoriaDestino: document.getElementById('mig-destino').value,
-    motivo: document.getElementById('mig-motivo').value,
+    categoriaDestino: categoriaDestino,
+    motivo: motivo,
     cargoAlvo: document.getElementById('mig-cargo-alvo').value,
-    dataFato: document.getElementById('mig-data-fato').value.trim(),
+    dataFato: dataFato,
     observacaoExtra: obsComUsuario
   };
   const btn = document.getElementById('mig-confirmar');
   btn.disabled = true; btn.textContent = 'Migrando...';
   try {
+    body.usuario = currentUser ? currentUser.email : '';
     const resp = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) });
     const data = await resp.json();
     if (data.erro) throw new Error(data.erro);
@@ -1417,45 +1624,138 @@ document.getElementById('back-step2').addEventListener('click', () => setStep(2)
 document.querySelectorAll('.step-item').forEach(el => el.addEventListener('click', () => setStep(parseInt(el.getAttribute('data-step')))));
 
 // ---------------------------------------------------------------------
-// NAVEGAÇÃO ENTRE ÁREAS (Cadastro/Busca vs. Relatórios)
+// NAVEGAÇÃO ENTRE ÁREAS (Início/Dashboard, Cadastro/Busca, Relatórios)
 // ---------------------------------------------------------------------
+const areaDashboard = document.getElementById('area-dashboard');
 const areaCadastro = document.getElementById('area-cadastro');
 const areaRelatorios = document.getElementById('area-relatorios');
+const navDashboard = document.getElementById('nav-dashboard');
 const navCadastro = document.getElementById('nav-cadastro');
 const navRelatorios = document.getElementById('nav-relatorios');
 
-navCadastro.addEventListener('click', () => {
-  areaCadastro.classList.remove('hidden');
-  areaRelatorios.classList.add('hidden');
-  navCadastro.classList.add('primary');
-  navRelatorios.classList.remove('primary');
+function mostrarAreaPrincipal(nome) {
+  areaDashboard.classList.toggle('hidden', nome !== 'dashboard');
+  areaCadastro.classList.toggle('hidden', nome !== 'cadastro');
+  areaRelatorios.classList.toggle('hidden', nome !== 'relatorios');
+  navDashboard.classList.toggle('primary', nome === 'dashboard');
+  navCadastro.classList.toggle('primary', nome === 'cadastro');
+  navRelatorios.classList.toggle('primary', nome === 'relatorios');
+  if (nome === 'dashboard') carregarDashboard();
+}
+navDashboard.addEventListener('click', () => mostrarAreaPrincipal('dashboard'));
+navCadastro.addEventListener('click', () => mostrarAreaPrincipal('cadastro'));
+navRelatorios.addEventListener('click', () => mostrarAreaPrincipal('relatorios'));
+
+// ---------------------------------------------------------------------
+// DASHBOARD INICIAL
+// ---------------------------------------------------------------------
+async function carregarDashboard() {
+  const loading = document.getElementById('dash-loading');
+  const conteudo = document.getElementById('dash-conteudo');
+  loading.classList.remove('hidden');
+  conteudo.classList.add('hidden');
+  try {
+    const resp = await fetch(API_URL + '?action=dashboard');
+    const data = await resp.json();
+    if (data.erro) throw new Error(data.erro);
+
+    document.getElementById('dash-total').textContent = data.totalProcessos;
+    document.getElementById('dash-atrasados').textContent = data.totalAtrasados;
+    document.getElementById('dash-vencendo').textContent = data.totalVencendo;
+    document.getElementById('dash-sem-parecer').textContent = data.totalSemParecer;
+
+    const porCategoriaDiv = document.getElementById('dash-por-categoria');
+    porCategoriaDiv.innerHTML = '';
+    Object.keys(data.porCategoria || {}).forEach(cat => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex; justify-content:space-between; padding:6px 10px; background:#F7F5F1; border-radius:6px; margin-bottom:6px; font-size:12.5px;';
+      row.innerHTML = '<span>' + esc(cat) + '</span><strong>' + data.porCategoria[cat] + '</strong>';
+      porCategoriaDiv.appendChild(row);
+    });
+
+    conteudo.classList.remove('hidden');
+  } catch (err) {
+    conteudo.innerHTML = '<div class="box" style="border-color:#D98C8C;"><p style="margin:0; font-size:13px; color:#A33;">Erro ao carregar: ' + esc(err.message) + '</p></div>';
+    conteudo.classList.remove('hidden');
+  } finally {
+    loading.classList.add('hidden');
+  }
+}
+
+// ---------------------------------------------------------------------
+// ALERTA: processos sem parecer emitido (sino no cabeçalho)
+// ---------------------------------------------------------------------
+async function carregarAlertaSemParecer() {
+  try {
+    const resp = await fetch(API_URL + '?action=relatorioSemParecer');
+    const data = await resp.json();
+    if (data.erro) return;
+    const badge = document.getElementById('alerta-badge');
+    const lista = document.getElementById('alerta-lista');
+    if (data.total > 0) {
+      badge.textContent = data.total > 99 ? '99+' : data.total;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+    lista.innerHTML = data.resultados.slice(0, 15).map(r =>
+      '<div style="padding:6px 0; border-bottom:1px solid #E4E0D4;"><strong>' + esc(r.nome) + '</strong><br><span style="color:#8A897F;">' + esc(r.categoria) + ' · ' + esc(r.processo || 's/nº') + '</span></div>'
+    ).join('') || '<p class="muted" style="margin:0;">Nenhum processo sem parecer. 🎉</p>';
+    if (data.total > 15) lista.innerHTML += '<p style="margin:8px 0 0; font-size:11.5px; color:#8A897F;">+ ' + (data.total - 15) + ' outro(s)...</p>';
+  } catch (err) {}
+}
+document.getElementById('alerta-sino').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('alerta-painel').classList.toggle('hidden');
 });
-navRelatorios.addEventListener('click', () => {
-  areaCadastro.classList.add('hidden');
-  areaRelatorios.classList.remove('hidden');
-  navRelatorios.classList.add('primary');
-  navCadastro.classList.remove('primary');
-});
+document.addEventListener('click', () => document.getElementById('alerta-painel').classList.add('hidden'));
 
 // Sub-abas dentro de Relatórios
 const subviewAcompanhamento = document.getElementById('subview-acompanhamento');
 const subviewContagem = document.getElementById('subview-contagem');
 const subviewAnalista = document.getElementById('subview-analista');
+const subviewSemParecer = document.getElementById('subview-sem-parecer');
 const subnavAcompanhamento = document.getElementById('subnav-acompanhamento');
 const subnavContagem = document.getElementById('subnav-contagem');
 const subnavAnalista = document.getElementById('subnav-analista');
+const subnavSemParecer = document.getElementById('subnav-sem-parecer');
 
 function mostrarSubview(nome) {
   subviewAcompanhamento.classList.toggle('hidden', nome !== 'acompanhamento');
   subviewContagem.classList.toggle('hidden', nome !== 'contagem');
   subviewAnalista.classList.toggle('hidden', nome !== 'analista');
+  subviewSemParecer.classList.toggle('hidden', nome !== 'semparecer');
   subnavAcompanhamento.classList.toggle('primary', nome === 'acompanhamento');
   subnavContagem.classList.toggle('primary', nome === 'contagem');
   subnavAnalista.classList.toggle('primary', nome === 'analista');
+  subnavSemParecer.classList.toggle('primary', nome === 'semparecer');
 }
 subnavAcompanhamento.addEventListener('click', () => mostrarSubview('acompanhamento'));
 subnavContagem.addEventListener('click', () => mostrarSubview('contagem'));
 subnavAnalista.addEventListener('click', () => mostrarSubview('analista'));
+subnavSemParecer.addEventListener('click', () => mostrarSubview('semparecer'));
+
+// ---------------------------------------------------------------------
+// EXPORTAR CSV: função genérica para baixar qualquer lista de objetos
+// ---------------------------------------------------------------------
+function exportarCsv(nomeArquivo, colunas, linhas) {
+  const escapeCsv = (v) => {
+    const s = String(v === undefined || v === null ? '' : v);
+    return /[",;\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const cabecalho = colunas.map(c => escapeCsv(c.titulo)).join(';');
+  const corpo = linhas.map(linha => colunas.map(c => escapeCsv(linha[c.campo])).join(';')).join('\n');
+  const conteudo = '\uFEFF' + cabecalho + '\n' + corpo; // BOM para acentuação correta no Excel
+  const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nomeArquivo;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
 // ---------------------------------------------------------------------
 // RELATÓRIO DE ACOMPANHAMENTO ANUAL
@@ -1558,6 +1858,16 @@ function renderRelatorio() {
 }
 
 document.getElementById('rel-gerar').addEventListener('click', gerarRelatorio);
+document.getElementById('rel-exportar').addEventListener('click', () => {
+  const filtro = filtroRelatorioAtual;
+  const lista = filtro === 'todos' ? ultimoRelatorio : ultimoRelatorio.filter(r => r.situacao === filtro);
+  if (!lista.length) { alert('Gere o relatório antes de exportar.'); return; }
+  exportarCsv('acompanhamento_anual.csv',
+    [{ titulo: 'Nome', campo: 'nome' }, { titulo: 'Processo', campo: 'processo' }, { titulo: 'Categoria', campo: 'categoria' },
+     { titulo: 'Vencimento', campo: 'dataAcompanhamento' }, { titulo: 'Situação', campo: 'situacao' }, { titulo: 'Analista', campo: 'atribuicao' }],
+    lista
+  );
+});
 
 // ---------------------------------------------------------------------
 // CONTAGEM DE PROCESSOS POR CATEGORIA (com deduplicação)
@@ -1624,6 +1934,8 @@ document.getElementById('cont-gerar').addEventListener('click', async () => {
 // ---------------------------------------------------------------------
 // RELATÓRIO POR ANALISTA
 // ---------------------------------------------------------------------
+let ultimoRelatorioAnalista = [];
+
 document.getElementById('analista-gerar').addEventListener('click', async () => {
   const analista = document.getElementById('analista-select').value;
   const loading = document.getElementById('analista-loading');
@@ -1645,6 +1957,7 @@ document.getElementById('analista-gerar').addEventListener('click', async () => 
     const listaAnalista = (relatorioCompleto.resultados || [])
       .filter(r => removerAcentosClient((r.atribuicao || '').toUpperCase()) === removerAcentosClient(analista.toUpperCase()))
       .sort((a, b) => b.diasAtraso - a.diasAtraso);
+    ultimoRelatorioAnalista = listaAnalista;
 
     const totalAtrasados = listaAnalista.filter(r => r.situacao === 'ATRASADO').length;
     const totalVencendo = listaAnalista.filter(r => r.situacao === 'VENCENDO EM BREVE').length;
@@ -1687,6 +2000,65 @@ document.getElementById('analista-gerar').addEventListener('click', async () => 
   } finally {
     loading.classList.add('hidden');
   }
+});
+document.getElementById('analista-exportar').addEventListener('click', () => {
+  if (!ultimoRelatorioAnalista.length) { alert('Gere o relatório antes de exportar.'); return; }
+  exportarCsv('processos_por_analista.csv',
+    [{ titulo: 'Nome', campo: 'nome' }, { titulo: 'Processo', campo: 'processo' }, { titulo: 'Categoria', campo: 'categoria' },
+     { titulo: 'Vencimento', campo: 'dataAcompanhamento' }, { titulo: 'Situação', campo: 'situacao' }],
+    ultimoRelatorioAnalista
+  );
+});
+
+// ---------------------------------------------------------------------
+// RELATÓRIO: PROCESSOS SEM PARECER
+// ---------------------------------------------------------------------
+let ultimoSemParecer = [];
+
+async function gerarSemParecer() {
+  const loading = document.getElementById('semparecer-loading');
+  const resumo = document.getElementById('semparecer-resumo');
+  const tabela = document.getElementById('semparecer-tabela');
+  loading.classList.remove('hidden');
+  resumo.innerHTML = '';
+  tabela.innerHTML = '';
+  try {
+    const resp = await fetch(API_URL + '?action=relatorioSemParecer');
+    const data = await resp.json();
+    if (data.erro) throw new Error(data.erro);
+    ultimoSemParecer = data.resultados || [];
+
+    resumo.innerHTML = '<div class="box" style="text-align:center; border-color:#C9C7BC; background:#F1EFE8; margin-bottom:16px;"><p style="margin:0; font-size:24px; font-weight:600; color:#4A4943;">' + ultimoSemParecer.length + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#6B6A62;">Processos sem parecer</p></div>';
+
+    if (!ultimoSemParecer.length) {
+      tabela.innerHTML = '<div class="box" style="text-align:center;"><p class="muted" style="margin:0; font-size:13px;">Todos os processos têm parecer emitido. 🎉</p></div>';
+      return;
+    }
+
+    let html = '<div style="max-height:520px; overflow-y:auto; border:1px solid #E4E0D4; border-radius:8px;"><table style="width:100%; border-collapse:collapse; font-size:12.5px;">' +
+      '<thead style="position:sticky; top:0; background:#F1EFE8;"><tr style="text-align:left;">' +
+      '<th style="padding:8px 10px;">Nome</th><th style="padding:8px 10px;">Processo</th><th style="padding:8px 10px;">Categoria</th></tr></thead><tbody>';
+    ultimoSemParecer.forEach(r => {
+      html += '<tr style="border-top:1px solid #E4E0D4;">' +
+        '<td style="padding:7px 10px;">' + esc(r.nome) + '</td>' +
+        '<td style="padding:7px 10px;">' + esc(r.processo) + '</td>' +
+        '<td style="padding:7px 10px;">' + esc(r.categoria) + '</td></tr>';
+    });
+    html += '</tbody></table></div>';
+    tabela.innerHTML = html;
+  } catch (err) {
+    tabela.innerHTML = '<div class="box" style="border-color:#D98C8C;"><p style="margin:0; font-size:13px; color:#A33;">Erro ao gerar: ' + esc(err.message) + '</p></div>';
+  } finally {
+    loading.classList.add('hidden');
+  }
+}
+document.getElementById('semparecer-gerar').addEventListener('click', gerarSemParecer);
+document.getElementById('semparecer-exportar').addEventListener('click', () => {
+  if (!ultimoSemParecer.length) { alert('Gere o relatório antes de exportar.'); return; }
+  exportarCsv('processos_sem_parecer.csv',
+    [{ titulo: 'Nome', campo: 'nome' }, { titulo: 'Processo', campo: 'processo' }, { titulo: 'Categoria', campo: 'categoria' }],
+    ultimoSemParecer
+  );
 });
 </script>
 </body>
