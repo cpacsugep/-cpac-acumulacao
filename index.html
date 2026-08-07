@@ -9,7 +9,14 @@
 <style>
   * { box-sizing: border-box; }
   body { font-family: -apple-system, 'Inter', Arial, sans-serif; background: #F1EFE8; margin: 0; padding: 24px; color: #2C2C2A; }
-  .app { max-width: 760px; margin: 0 auto; }
+  .app { max-width: 1100px; margin: 0 auto; }
+  .layout-duas-colunas { display: flex; gap: 20px; align-items: flex-start; }
+  .coluna-principal { flex: 1; min-width: 0; }
+  .coluna-dashboard { width: 280px; flex-shrink: 0; position: sticky; top: 20px; }
+  @media (max-width: 900px) {
+    .layout-duas-colunas { flex-direction: column; }
+    .coluna-dashboard { width: 100%; position: static; }
+  }
   .header { background: #1B3A5C; border-radius: 12px 12px 0 0; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .header .title { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 19px; color: #F7F5F1; }
   .header .subtitle { margin: 2px 0 0; font-size: 12.5px; color: #B8C4D1; }
@@ -86,7 +93,7 @@
     </div>
     <div style="display:flex; align-items:center; gap:16px;">
       <div id="alerta-sino" style="position:relative; cursor:pointer; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center;" title="Processos vencendo em breve">
-        <i class="ti ti-bell" style="font-size:19px; color:#F7F5F1;"></i>
+        <span style="font-size:18px; line-height:1;">🔔</span>
         <span id="alerta-badge" class="hidden" style="position:absolute; top:-4px; right:-4px; background:#C0392B; color:#fff; font-size:10px; font-weight:600; border-radius:10px; padding:1px 5px; min-width:16px; text-align:center; box-shadow:0 0 0 2px #1B3A5C;">0</span>
         <div id="alerta-painel" class="hidden" style="position:absolute; top:42px; right:-8px; background:#FFFFFF; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.2); padding:14px 16px; width:280px; z-index:500; text-align:left; cursor:default;">
           <p style="margin:0 0 8px; font-size:13px; font-weight:500; color:#1B3A5C;">Processos vencendo em breve</p>
@@ -101,28 +108,12 @@
     </div>
   </div>
 
+  <div class="layout-duas-colunas" style="margin-top:0;">
+  <div class="coluna-principal">
+
   <div class="row" style="padding:14px 28px 0; gap:8px; background:#F7F5F1; border:1px solid #E4E0D4; border-bottom:none;">
     <button type="button" id="nav-cadastro" class="primary">Cadastro / Busca</button>
     <button type="button" id="nav-relatorios"><i class="ti ti-alert-triangle"></i> Relatórios</button>
-    <button type="button" id="nav-dashboard"><i class="ti ti-chart-bar"></i> Estatística</button>
-  </div>
-
-  <div id="area-dashboard" class="hidden">
-    <div class="card" style="border-radius:0 0 12px 12px;">
-      <h2 class="section-title">Visão geral</h2>
-      <p class="section-sub">Resumo rápido da situação atual da CPAC.</p>
-      <div id="dash-loading" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Carregando...</div>
-      <div id="dash-conteudo" class="hidden">
-        <div class="row" style="gap:12px; flex-wrap:wrap; margin-bottom:20px;">
-          <div class="box" style="flex:1; min-width:140px; text-align:center; border-color:#97C459; background:#EAF3DE;"><p id="dash-total" style="margin:0; font-size:26px; font-weight:600; color:#27500A;">—</p><p style="margin:2px 0 0; font-size:11.5px; color:#3B6D11;">Processos catalogados</p></div>
-          <div class="box" style="flex:1; min-width:140px; text-align:center; border-color:#D98C8C; background:#FBEAEA;"><p id="dash-atrasados" style="margin:0; font-size:26px; font-weight:600; color:#A33;">—</p><p style="margin:2px 0 0; font-size:11.5px; color:#8A3A3A;">Atrasados</p></div>
-          <div class="box" style="flex:1; min-width:140px; text-align:center; border-color:#E8C77A; background:#FAF3E2;"><p id="dash-vencendo" style="margin:0; font-size:26px; font-weight:600; color:#85560B;">—</p><p style="margin:2px 0 0; font-size:11.5px; color:#85560B;">Vencendo em breve</p></div>
-          <div class="box" style="flex:1; min-width:140px; text-align:center; border-color:#C9C7BC; background:#F1EFE8;"><p id="dash-sem-parecer" style="margin:0; font-size:26px; font-weight:600; color:#4A4943;">—</p><p style="margin:2px 0 0; font-size:11.5px; color:#6B6A62;">Sem parecer emitido</p></div>
-        </div>
-        <p style="margin:0 0 8px; font-size:13px; font-weight:500; color:#1B3A5C;">Processos por categoria</p>
-        <div id="dash-por-categoria"></div>
-      </div>
-    </div>
   </div>
 
   <div id="area-cadastro">
@@ -528,7 +519,6 @@
         <button type="button" id="subnav-acompanhamento" class="primary" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-calendar-due"></i> Acompanhamento anual</button>
         <button type="button" id="subnav-contagem" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-calculator"></i> Contagem de processos</button>
         <button type="button" id="subnav-analista" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-user"></i> Por analista</button>
-        <button type="button" id="subnav-sem-parecer" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-file-off"></i> Sem parecer</button>
       </div>
 
       <!-- SUB-ABA: ACOMPANHAMENTO ANUAL -->
@@ -592,23 +582,30 @@
         <div id="analista-tabela"></div>
       </div>
 
-      <!-- SUB-ABA: SEM PARECER -->
-      <div id="subview-sem-parecer" class="hidden">
-        <h2 class="section-title">Processos sem parecer emitido</h2>
-        <p class="section-sub">Todas as categorias, todos os processos que ainda não têm um parecer registrado.</p>
-
-        <div class="row" style="margin-bottom:18px; gap:10px;">
-          <button type="button" id="semparecer-gerar" class="primary"><i class="ti ti-refresh"></i> Gerar</button>
-          <button type="button" id="semparecer-exportar"><i class="ti ti-download"></i> Exportar CSV</button>
-        </div>
-
-        <div id="semparecer-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Consultando planilha...</div>
-        <div id="semparecer-resumo"></div>
-        <div id="semparecer-tabela"></div>
-      </div>
-
     </div>
   </div>
+
+  </div> <!-- fecha coluna-principal -->
+
+  <div class="coluna-dashboard">
+    <div class="card" style="padding:18px 20px;">
+      <p style="margin:0 0 2px; font-size:13px; font-weight:500; color:#1B3A5C;">Estatística</p>
+      <p style="margin:0 0 14px; font-size:10.5px; color:#8A897F;">Atualiza a cada 5 minutos</p>
+      <div id="dash-loading" style="font-size:12px; color:#6B6A62; padding:8px 0;">Carregando...</div>
+      <div id="dash-conteudo" class="hidden">
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
+          <div class="box" style="text-align:center; border-color:#97C459; background:#EAF3DE; padding:10px;"><p id="dash-total" style="margin:0; font-size:22px; font-weight:600; color:#27500A;">—</p><p style="margin:2px 0 0; font-size:11px; color:#3B6D11;">Processos catalogados</p></div>
+          <div class="box" style="text-align:center; border-color:#D98C8C; background:#FBEAEA; padding:10px;"><p id="dash-atrasados" style="margin:0; font-size:22px; font-weight:600; color:#A33;">—</p><p style="margin:2px 0 0; font-size:11px; color:#8A3A3A;">Atrasados</p></div>
+          <div class="box" style="text-align:center; border-color:#E8C77A; background:#FAF3E2; padding:10px;"><p id="dash-vencendo" style="margin:0; font-size:22px; font-weight:600; color:#85560B;">—</p><p style="margin:2px 0 0; font-size:11px; color:#85560B;">Vencendo em breve</p></div>
+        </div>
+        <p style="margin:0 0 8px; font-size:12.5px; font-weight:500; color:#1B3A5C;">Por categoria</p>
+        <div id="dash-por-categoria"></div>
+        <p id="dash-atualizado" style="margin:14px 0 0; font-size:10.5px; color:#8A897F; text-align:center;"></p>
+      </div>
+    </div>
+  </div>
+
+  </div> <!-- fecha layout-duas-colunas -->
 
 </div>
 
@@ -688,6 +685,12 @@ function entrarNoSistema() {
 
   carregarDashboard();
   carregarAlertaVencendo();
+
+  // Atualiza a coluna de Estatística e o alerta a cada 5 minutos, automaticamente
+  setInterval(() => {
+    carregarDashboard();
+    carregarAlertaVencendo();
+  }, 5 * 60 * 1000);
 }
 
 document.getElementById('logout-link').addEventListener('click', () => {
@@ -1626,25 +1629,20 @@ document.getElementById('back-step2').addEventListener('click', () => setStep(2)
 document.querySelectorAll('.step-item').forEach(el => el.addEventListener('click', () => setStep(parseInt(el.getAttribute('data-step')))));
 
 // ---------------------------------------------------------------------
-// NAVEGAÇÃO ENTRE ÁREAS (Início/Dashboard, Cadastro/Busca, Relatórios)
+// NAVEGAÇÃO ENTRE ÁREAS (Cadastro/Busca, Relatórios) — Estatística agora
+// é uma coluna lateral fixa, sempre visível, não faz parte dessa navegação.
 // ---------------------------------------------------------------------
-const areaDashboard = document.getElementById('area-dashboard');
 const areaCadastro = document.getElementById('area-cadastro');
 const areaRelatorios = document.getElementById('area-relatorios');
-const navDashboard = document.getElementById('nav-dashboard');
 const navCadastro = document.getElementById('nav-cadastro');
 const navRelatorios = document.getElementById('nav-relatorios');
 
 function mostrarAreaPrincipal(nome) {
-  areaDashboard.classList.toggle('hidden', nome !== 'dashboard');
   areaCadastro.classList.toggle('hidden', nome !== 'cadastro');
   areaRelatorios.classList.toggle('hidden', nome !== 'relatorios');
-  navDashboard.classList.toggle('primary', nome === 'dashboard');
   navCadastro.classList.toggle('primary', nome === 'cadastro');
   navRelatorios.classList.toggle('primary', nome === 'relatorios');
-  if (nome === 'dashboard') carregarDashboard();
 }
-navDashboard.addEventListener('click', () => mostrarAreaPrincipal('dashboard'));
 navCadastro.addEventListener('click', () => mostrarAreaPrincipal('cadastro'));
 navRelatorios.addEventListener('click', () => mostrarAreaPrincipal('relatorios'));
 
@@ -1664,7 +1662,6 @@ async function carregarDashboard() {
     document.getElementById('dash-total').textContent = data.totalProcessos;
     document.getElementById('dash-atrasados').textContent = data.totalAtrasados;
     document.getElementById('dash-vencendo').textContent = data.totalVencendo;
-    document.getElementById('dash-sem-parecer').textContent = data.totalSemParecer;
 
     const porCategoriaDiv = document.getElementById('dash-por-categoria');
     porCategoriaDiv.innerHTML = '';
@@ -1676,6 +1673,8 @@ async function carregarDashboard() {
     });
 
     conteudo.classList.remove('hidden');
+    const agora = new Date();
+    document.getElementById('dash-atualizado').textContent = 'Atualizado às ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   } catch (err) {
     conteudo.innerHTML = '<div class="box" style="border-color:#D98C8C;"><p style="margin:0; font-size:13px; color:#A33;">Erro ao carregar: ' + esc(err.message) + '</p></div>';
     conteudo.classList.remove('hidden');
@@ -1717,26 +1716,21 @@ document.addEventListener('click', () => document.getElementById('alerta-painel'
 const subviewAcompanhamento = document.getElementById('subview-acompanhamento');
 const subviewContagem = document.getElementById('subview-contagem');
 const subviewAnalista = document.getElementById('subview-analista');
-const subviewSemParecer = document.getElementById('subview-sem-parecer');
 const subnavAcompanhamento = document.getElementById('subnav-acompanhamento');
 const subnavContagem = document.getElementById('subnav-contagem');
 const subnavAnalista = document.getElementById('subnav-analista');
-const subnavSemParecer = document.getElementById('subnav-sem-parecer');
 
 function mostrarSubview(nome) {
   subviewAcompanhamento.classList.toggle('hidden', nome !== 'acompanhamento');
   subviewContagem.classList.toggle('hidden', nome !== 'contagem');
   subviewAnalista.classList.toggle('hidden', nome !== 'analista');
-  subviewSemParecer.classList.toggle('hidden', nome !== 'semparecer');
   subnavAcompanhamento.classList.toggle('primary', nome === 'acompanhamento');
   subnavContagem.classList.toggle('primary', nome === 'contagem');
   subnavAnalista.classList.toggle('primary', nome === 'analista');
-  subnavSemParecer.classList.toggle('primary', nome === 'semparecer');
 }
 subnavAcompanhamento.addEventListener('click', () => mostrarSubview('acompanhamento'));
 subnavContagem.addEventListener('click', () => mostrarSubview('contagem'));
 subnavAnalista.addEventListener('click', () => mostrarSubview('analista'));
-subnavSemParecer.addEventListener('click', () => mostrarSubview('semparecer'));
 
 // ---------------------------------------------------------------------
 // EXPORTAR CSV: função genérica para baixar qualquer lista de objetos
@@ -2010,57 +2004,6 @@ document.getElementById('analista-exportar').addEventListener('click', () => {
     [{ titulo: 'Nome', campo: 'nome' }, { titulo: 'Processo', campo: 'processo' }, { titulo: 'Categoria', campo: 'categoria' },
      { titulo: 'Vencimento', campo: 'dataAcompanhamento' }, { titulo: 'Situação', campo: 'situacao' }],
     ultimoRelatorioAnalista
-  );
-});
-
-// ---------------------------------------------------------------------
-// RELATÓRIO: PROCESSOS SEM PARECER
-// ---------------------------------------------------------------------
-let ultimoSemParecer = [];
-
-async function gerarSemParecer() {
-  const loading = document.getElementById('semparecer-loading');
-  const resumo = document.getElementById('semparecer-resumo');
-  const tabela = document.getElementById('semparecer-tabela');
-  loading.classList.remove('hidden');
-  resumo.innerHTML = '';
-  tabela.innerHTML = '';
-  try {
-    const resp = await fetch(API_URL + '?action=relatorioSemParecer');
-    const data = await resp.json();
-    if (data.erro) throw new Error(data.erro);
-    ultimoSemParecer = data.resultados || [];
-
-    resumo.innerHTML = '<div class="box" style="text-align:center; border-color:#C9C7BC; background:#F1EFE8; margin-bottom:16px;"><p style="margin:0; font-size:24px; font-weight:600; color:#4A4943;">' + ultimoSemParecer.length + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#6B6A62;">Processos sem parecer</p></div>';
-
-    if (!ultimoSemParecer.length) {
-      tabela.innerHTML = '<div class="box" style="text-align:center;"><p class="muted" style="margin:0; font-size:13px;">Todos os processos têm parecer emitido. 🎉</p></div>';
-      return;
-    }
-
-    let html = '<div style="max-height:520px; overflow-y:auto; border:1px solid #E4E0D4; border-radius:8px;"><table style="width:100%; border-collapse:collapse; font-size:12.5px;">' +
-      '<thead style="position:sticky; top:0; background:#F1EFE8;"><tr style="text-align:left;">' +
-      '<th style="padding:8px 10px;">Nome</th><th style="padding:8px 10px;">Processo</th><th style="padding:8px 10px;">Categoria</th></tr></thead><tbody>';
-    ultimoSemParecer.forEach(r => {
-      html += '<tr style="border-top:1px solid #E4E0D4;">' +
-        '<td style="padding:7px 10px;">' + esc(r.nome) + '</td>' +
-        '<td style="padding:7px 10px;">' + esc(r.processo) + '</td>' +
-        '<td style="padding:7px 10px;">' + esc(r.categoria) + '</td></tr>';
-    });
-    html += '</tbody></table></div>';
-    tabela.innerHTML = html;
-  } catch (err) {
-    tabela.innerHTML = '<div class="box" style="border-color:#D98C8C;"><p style="margin:0; font-size:13px; color:#A33;">Erro ao gerar: ' + esc(err.message) + '</p></div>';
-  } finally {
-    loading.classList.add('hidden');
-  }
-}
-document.getElementById('semparecer-gerar').addEventListener('click', gerarSemParecer);
-document.getElementById('semparecer-exportar').addEventListener('click', () => {
-  if (!ultimoSemParecer.length) { alert('Gere o relatório antes de exportar.'); return; }
-  exportarCsv('processos_sem_parecer.csv',
-    [{ titulo: 'Nome', campo: 'nome' }, { titulo: 'Processo', campo: 'processo' }, { titulo: 'Categoria', campo: 'categoria' }],
-    ultimoSemParecer
   );
 });
 </script>
