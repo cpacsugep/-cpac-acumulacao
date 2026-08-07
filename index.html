@@ -320,15 +320,16 @@
 
     <!-- FICHA -->
     <div id="view-ficha" class="hidden">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
-        <button type="button" id="ficha-voltar"><i class="ti ti-arrow-left"></i> Voltar à busca</button>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button type="button" id="ficha-historico-toggle"><i class="ti ti-history"></i> Histórico</button>
-          <button type="button" id="ficha-diligencia-toggle" style="color:#8B4513; border-color:#8B4513;"><i class="ti ti-gavel"></i> Marcar diligência</button>
-          <button type="button" id="ficha-editar-toggle" style="color:#1B3A5C; border-color:#1B3A5C;"><i class="ti ti-pencil"></i> Alterar dados</button>
-          <button type="button" id="ficha-migrar-toggle" style="color:#B8862B; border-color:#B8862B;"><i class="ti ti-transfer"></i> Registrar mudança de categoria</button>
-          <button type="button" id="ficha-baixar" class="primary"><i class="ti ti-download"></i> Baixar ficha em PDF</button>
-        </div>
+      <div style="margin-bottom:18px;">
+        <button type="button" id="ficha-voltar" style="font-size:12px; padding:6px 12px; color:#6B6A62;"><i class="ti ti-arrow-left"></i> Voltar à busca</button>
+      </div>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px;">
+        <button type="button" id="ficha-editar-toggle" class="primary" style="padding:9px 18px;"><i class="ti ti-pencil"></i> Alterar dados</button>
+        <button type="button" id="ficha-baixar" style="color:#1B3A5C; border-color:#1B3A5C; padding:9px 18px;"><i class="ti ti-download"></i> Baixar ficha em PDF</button>
+        <button type="button" id="ficha-migrar-toggle" style="color:#B8862B; border-color:#B8862B; padding:9px 16px;"><i class="ti ti-transfer"></i> Registrar mudança de categoria</button>
+        <button type="button" id="ficha-diligencia-toggle" style="color:#8B4513; border-color:#8B4513; padding:9px 16px;"><i class="ti ti-gavel"></i> Marcar diligência</button>
+        <button type="button" id="ficha-historico-toggle" style="font-size:12px; padding:7px 14px; color:#6B6A62;"><i class="ti ti-history"></i> Histórico</button>
       </div>
 
       <div id="diligencia-painel" class="hidden box" style="margin-bottom:18px; border-color:#D2A679; background:#FBF3E9;">
