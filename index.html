@@ -1319,7 +1319,8 @@ async function carregarDiligencias() {
   if (!currentUser) return;
   const loading = document.getElementById('dilig-loading');
   const lista = document.getElementById('dilig-lista');
-  loading.classList.remove('hidden');
+  const primeiraVez = lista.innerHTML.trim() === '';
+  if (primeiraVez) loading.classList.remove('hidden');
   try {
     const resp = await fetch(API_URL + '?action=listarDiligencias&analista=' + encodeURIComponent(currentUser.email));
     const data = await resp.json();
@@ -1794,8 +1795,8 @@ navRelatorios.addEventListener('click', () => mostrarAreaPrincipal('relatorios')
 async function carregarDashboard() {
   const loading = document.getElementById('dash-loading');
   const conteudo = document.getElementById('dash-conteudo');
-  loading.classList.remove('hidden');
-  conteudo.classList.add('hidden');
+  const primeiraVez = conteudo.classList.contains('hidden');
+  if (primeiraVez) loading.classList.remove('hidden'); // só mostra "Carregando..." na primeira vez
   try {
     const resp = await fetch(API_URL + '?action=dashboard');
     const data = await resp.json();
@@ -1818,8 +1819,11 @@ async function carregarDashboard() {
     const agora = new Date();
     document.getElementById('dash-atualizado').textContent = 'Atualizado às ' + agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   } catch (err) {
-    conteudo.innerHTML = '<div class="box" style="border-color:#D98C8C;"><p style="margin:0; font-size:13px; color:#A33;">Erro ao carregar: ' + esc(err.message) + '</p></div>';
-    conteudo.classList.remove('hidden');
+    if (primeiraVez) {
+      conteudo.innerHTML = '<div class="box" style="border-color:#D98C8C;"><p style="margin:0; font-size:13px; color:#A33;">Erro ao carregar: ' + esc(err.message) + '</p></div>';
+      conteudo.classList.remove('hidden');
+    }
+    // em atualizações automáticas seguintes, se der erro, mantém o que já estava na tela
   } finally {
     loading.classList.add('hidden');
   }
