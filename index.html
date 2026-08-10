@@ -616,7 +616,7 @@
   </div> <!-- fecha bloco-flutuante -->
   </div> <!-- fecha coluna-principal -->
 
-  <div class="coluna-dashboard">
+  <div class="coluna-dashboard" id="coluna-dashboard-el">
     <div class="card bloco-flutuante" style="padding:18px 20px; border:1px solid #E4E0D4; border-radius:12px;">
       <p style="margin:0 0 2px; font-size:13px; font-weight:500; color:#1B3A5C;">Estatística</p>
       <p style="margin:0 0 14px; font-size:10.5px; color:#8A897F;">Atualiza a cada 5 minutos</p>
@@ -661,16 +661,20 @@ const migResultado = document.getElementById('mig-resultado');
 // =====================================================================
 const GOOGLE_CLIENT_ID = '392648516639-3vij1mqsfjld31otsahaols1325gp7mh.apps.googleusercontent.com';
 
-// Lista de e-mails autorizados a acessar o sistema (qualquer conta Google, desde que esteja aqui).
-// Adicione/remova e-mails conforme necessário — não precisa ser do mesmo domínio.
-const EMAILS_AUTORIZADOS = [
-  'denis.cursodireito@gmail.com',
-  'cpac.sugep@edu.se.df.gov.br',
-  'jeesmartins@gmail.com',
-  'dilceiatorres@gmail.com'
-];
+// Cada e-mail autorizado tem um PERFIL associado:
+//   'gestor'   → acesso a tudo (Cadastro/Busca, Relatórios, Estatística, alerta de vencimento)
+//   'cadastro' → só Cadastro/Busca (sem Relatórios, sem Estatística, sem alerta de vencimento)
+// Adicione/remova e-mails e ajuste o perfil conforme necessário — não precisa ser do mesmo domínio.
+const PERFIS = {
+  'denis.cursodireito@gmail.com': 'gestor',
+  'jeesmartins@gmail.com': 'gestor',
+  'cpac.sugep@edu.se.df.gov.br': 'cadastro',
+  'dilceiatorres@gmail.com': 'cadastro'
+};
+const EMAILS_AUTORIZADOS = Object.keys(PERFIS);
 
 let currentUser = null; // { nome, email }
+let perfilAtual = 'cadastro';
 
 function decodeJwt(token) {
   const base64Url = token.split('.')[1];
@@ -698,29 +702,31 @@ function handleCredentialResponse(response) {
   entrarNoSistema();
 }
 
-// E-mails autorizados a ver o menu "Relatórios" (hoje: apenas Denis e Jessica).
-const EMAILS_RELATORIOS = [
-  'denis.cursodireito@gmail.com',
-  'jeesmartins@gmail.com'
-];
-
 function entrarNoSistema() {
   document.getElementById('login-overlay').classList.add('hidden');
   document.getElementById('app-container').classList.remove('hidden');
   document.getElementById('usuario-logado').textContent = currentUser.nome + ' (' + currentUser.email + ')';
 
-  const podeVerRelatorios = EMAILS_RELATORIOS.some(e => e.toLowerCase() === currentUser.email.toLowerCase());
-  document.getElementById('nav-relatorios').classList.toggle('hidden', !podeVerRelatorios);
+  perfilAtual = PERFIS[currentUser.email.toLowerCase()] || 'cadastro';
+  const ehGestor = perfilAtual === 'gestor';
 
-  carregarDashboard();
-  carregarAlertaVencendo();
+  document.getElementById('nav-relatorios').classList.toggle('hidden', !ehGestor);
+  document.getElementById('coluna-dashboard-el').classList.toggle('hidden', !ehGestor);
+  // O sino de alerta (processos vencendo em breve) fica visível para todos os perfis
+
   carregarDiligencias();
+  carregarAlertaVencendo();
+  if (ehGestor) {
+    carregarDashboard();
+  }
 
   // Atualiza a coluna de Estatística, o alerta e as diligências a cada 5 minutos
   setInterval(() => {
-    carregarDashboard();
-    carregarAlertaVencendo();
     carregarDiligencias();
+    carregarAlertaVencendo();
+    if (perfilAtual === 'gestor') {
+      carregarDashboard();
+    }
   }, 5 * 60 * 1000);
 }
 
