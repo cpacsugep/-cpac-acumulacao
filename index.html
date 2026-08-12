@@ -78,6 +78,16 @@
   </div>
 </div>
 
+<div id="categoria-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(44,44,42,0.35); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:2000;">
+  <div style="background:#FFFFFF; border-radius:14px; padding:10px; width:340px; max-width:90%; box-shadow:0 16px 40px rgba(0,0,0,0.3);">
+    <p style="margin:10px 14px 8px; font-size:13px; font-weight:500; color:#1B3A5C;">Qual categoria deseja cadastrar?</p>
+    <div id="categoria-modal-lista"></div>
+    <div style="padding:8px 14px 4px;">
+      <button type="button" id="categoria-modal-cancelar" style="width:100%; font-size:12.5px; padding:8px;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div id="login-overlay" style="position:fixed; inset:0; background:#1B3A5C; display:flex; align-items:center; justify-content:center; z-index:1000;">
   <div style="background:#FFFFFF; border-radius:12px; padding:36px 32px; max-width:380px; width:90%; text-align:center;">
     <p style="margin:0 0 4px; font-family:Georgia,serif; font-size:18px; color:#1B3A5C;">CPAC Digital</p>
@@ -960,11 +970,48 @@ function resetFormularioCadastro() {
 document.getElementById('view-cadastro').addEventListener('input', agendarSalvamentoRascunho);
 document.getElementById('view-cadastro').addEventListener('change', agendarSalvamentoRascunho);
 
+// ---------------------------------------------------------------------
+// TESTE DE APARÊNCIA: modal de seleção de categoria com fundo desfocado,
+// aberto ao clicar em "Cadastrar acumulação"
+// ---------------------------------------------------------------------
+const CATEGORIAS_MODAL = [
+  { valor: 'SEDF + SEDF', rotulo: 'SEDF + SEDF', icone: 'ti-building' },
+  { valor: 'SEDF + OUTRO', rotulo: 'SEDF + Outro órgão/ente', icone: 'ti-building-bank' },
+  { valor: 'CONTRATO TEMPORÁRIO', rotulo: 'Contrato Temporário', icone: 'ti-file-time' },
+  { valor: 'APOSENTADORIA / RESERVA', rotulo: 'Aposentadoria / Reserva', icone: 'ti-armchair' },
+  { valor: 'PENSÃO', rotulo: 'Pensão', icone: 'ti-heart-handshake' },
+  { valor: 'PERDA DE OBJETO', rotulo: 'Perda de objeto', icone: 'ti-file-off' }
+];
+
+const categoriaModalOverlay = document.getElementById('categoria-modal-overlay');
+const categoriaModalLista = document.getElementById('categoria-modal-lista');
+
+CATEGORIAS_MODAL.forEach(cat => {
+  const item = document.createElement('div');
+  item.style.cssText = 'display:flex; align-items:center; gap:10px; padding:11px 14px; margin:2px 6px; border-radius:8px; cursor:pointer; font-size:13px; color:#2C2C2A; transition:background 0.12s;';
+  item.innerHTML = '<i class="ti ' + cat.icone + '" style="font-size:17px; color:#1B3A5C;"></i> ' + esc(cat.rotulo);
+  item.addEventListener('mouseenter', () => item.style.background = '#F1EFE8');
+  item.addEventListener('mouseleave', () => item.style.background = '');
+  item.addEventListener('click', () => {
+    categoriaModalOverlay.classList.add('hidden');
+    resetFormularioCadastro();
+    document.getElementById('cad-nome').value = searchInput.value.trim();
+    document.getElementById('cad-categoria').value = cat.valor;
+    atualizarCampoVinculo2();
+    showView('view-cadastro');
+    restaurarRascunhoSeExistir();
+  });
+  categoriaModalLista.appendChild(item);
+});
+
 document.getElementById('go-cadastro-always').addEventListener('click', () => {
-  resetFormularioCadastro();
-  document.getElementById('cad-nome').value = searchInput.value.trim();
-  showView('view-cadastro');
-  restaurarRascunhoSeExistir();
+  categoriaModalOverlay.classList.remove('hidden');
+});
+document.getElementById('categoria-modal-cancelar').addEventListener('click', () => {
+  categoriaModalOverlay.classList.add('hidden');
+});
+categoriaModalOverlay.addEventListener('click', (e) => {
+  if (e.target === categoriaModalOverlay) categoriaModalOverlay.classList.add('hidden');
 });
 
 // ---------------------------------------------------------------------
