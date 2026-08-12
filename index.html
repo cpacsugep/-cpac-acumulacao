@@ -482,7 +482,8 @@
       </div>
       </div>
 
-      <div id="migrar-painel" class="hidden warn-box" style="flex-direction:column; margin-bottom:18px;">
+      <div id="migrar-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(44,44,42,0.35); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:1500; padding:20px;">
+      <div class="warn-box" style="flex-direction:column; max-width:520px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 16px 40px rgba(0,0,0,0.25);">
         <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#85560B;">Registrar mudança de categoria</p>
         <div class="grid2" style="margin-bottom:10px;">
           <div><label>Motivo</label>
@@ -517,6 +518,7 @@
           <button type="button" id="mig-confirmar" class="gold">Confirmar migração</button>
         </div>
         <p id="mig-resultado" class="hidden" style="margin:12px 0 0; font-size:12.5px; color:#27500A; background:#EAF3DE; border-radius:6px; padding:10px 12px; line-height:1.6;"></p>
+      </div>
       </div>
 
       <div id="ficha-conteudo" style="border:1px solid #E4E0D4; border-radius:8px; padding:24px;"></div>
@@ -667,7 +669,7 @@ const loadingIndicator = document.getElementById('loading-indicator');
 const pontoCargos = document.getElementById('ponto-cargos');
 const resumoBox = document.getElementById('resumo-box');
 const fichaConteudo = document.getElementById('ficha-conteudo');
-const migrarPainel = document.getElementById('migrar-painel');
+const migrarPainel = document.getElementById('migrar-modal-overlay');
 const migResultado = document.getElementById('mig-resultado');
 
 // =====================================================================
@@ -1617,6 +1619,7 @@ document.getElementById('ficha-migrar-toggle').addEventListener('click', () => {
   editarPainel.classList.add('hidden');
 });
 document.getElementById('mig-cancelar').addEventListener('click', () => migrarPainel.classList.add('hidden'));
+migrarPainel.addEventListener('click', (e) => { if (e.target === migrarPainel) migrarPainel.classList.add('hidden'); });
 document.getElementById('mig-motivo').addEventListener('change', sugerirDestino);
 
 function sugerirDestino() {
