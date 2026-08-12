@@ -61,7 +61,7 @@
 </head>
 <body>
 
-<div id="dup-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(27,58,92,0.55); display:flex; align-items:center; justify-content:center; z-index:2000;">
+<div id="dup-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(44,44,42,0.35); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:2000;">
   <div style="background:#FFFFFF; border-radius:12px; padding:24px 28px; max-width:460px; width:90%; box-shadow:0 12px 32px rgba(0,0,0,0.25);">
     <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:14px;">
       <i class="ti ti-alert-triangle" style="font-size:22px; color:#B8862B; margin-top:2px;"></i>
@@ -342,7 +342,8 @@
         <button type="button" id="ficha-historico-toggle" style="font-size:12px; padding:7px 14px; color:#6B6A62;"><i class="ti ti-history"></i> Histórico</button>
       </div>
 
-      <div id="diligencia-painel" class="hidden box" style="margin-bottom:18px; border-color:#D2A679; background:#FBF3E9;">
+      <div id="diligencia-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(44,44,42,0.35); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:1500; padding:20px;">
+      <div class="box" style="border-color:#D2A679; background:#FBF3E9; max-width:480px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 16px 40px rgba(0,0,0,0.25);">
         <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#8B4513;">Marcar como diligência CGDF/TCDF</p>
         <div class="grid2" style="margin-bottom:12px;">
           <div><label>Prazo de vencimento</label><input id="dilig-prazo" type="date"></div>
@@ -354,6 +355,7 @@
         </div>
         <p id="dilig-resultado" class="hidden" style="margin:12px 0 0; font-size:12.5px; color:#27500A; background:#EAF3DE; border-radius:6px; padding:10px 12px;"></p>
       </div>
+      </div>
 
       <div id="historico-painel" class="hidden box" style="margin-bottom:18px;">
         <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Histórico de alterações</p>
@@ -361,7 +363,8 @@
         <div id="historico-lista"></div>
       </div>
 
-      <div id="editar-painel" class="hidden box" style="margin-bottom:18px;">
+      <div id="editar-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(44,44,42,0.35); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:1500; padding:20px;">
+      <div class="box" style="max-width:560px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 16px 40px rgba(0,0,0,0.25); background:#FFFFFF;">
         <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Alterar dados do processo</p>
 
         <!-- Padrão: SEDF + SEDF e SEDF + OUTRO -->
@@ -476,6 +479,7 @@
           <button type="button" id="edit-salvar" class="primary">Salvar alterações</button>
         </div>
         <p id="edit-resultado" class="hidden" style="margin:12px 0 0; font-size:12.5px; color:#27500A; background:#EAF3DE; border-radius:6px; padding:10px 12px;"></p>
+      </div>
       </div>
 
       <div id="migrar-painel" class="hidden warn-box" style="flex-direction:column; margin-bottom:18px;">
@@ -740,7 +744,12 @@ function entrarNoSistema() {
   }, 5 * 60 * 1000);
 }
 
-document.getElementById('logout-link').addEventListener('click', () => {
+document.getElementById('logout-link').addEventListener('click', async () => {
+  const confirmado = await mostrarModalDuplicidade(
+    '<div>Tem certeza que deseja sair do CPAC Digital?</div>',
+    { titulo: 'Sair do sistema', subtitulo: '', textoCancelar: 'Cancelar', textoContinuar: 'Sair' }
+  );
+  if (!confirmado) return;
   sessionStorage.removeItem('cpac_user');
   currentUser = null;
   location.reload();
@@ -1235,7 +1244,7 @@ function renderFicha(record) {
   editarPainel.classList.add('hidden');
   editResultado.classList.add('hidden');
   document.getElementById('historico-painel').classList.add('hidden');
-  document.getElementById('diligencia-painel').classList.add('hidden');
+  document.getElementById('diligencia-modal-overlay').classList.add('hidden');
   document.getElementById('mig-motivo').value = 'APOSENTADORIA';
   sugerirDestino();
 
@@ -1315,13 +1324,16 @@ document.getElementById('ficha-diligencia-toggle').addEventListener('click', () 
   document.getElementById('dilig-prazo').value = '';
   document.getElementById('dilig-obs').value = '';
   document.getElementById('dilig-resultado').classList.add('hidden');
-  document.getElementById('diligencia-painel').classList.toggle('hidden');
+  document.getElementById('diligencia-modal-overlay').classList.toggle('hidden');
   document.getElementById('historico-painel').classList.add('hidden');
   editarPainel.classList.add('hidden');
   migrarPainel.classList.add('hidden');
 });
 document.getElementById('dilig-cancelar').addEventListener('click', () => {
-  document.getElementById('diligencia-painel').classList.add('hidden');
+  document.getElementById('diligencia-modal-overlay').classList.add('hidden');
+});
+document.getElementById('diligencia-modal-overlay').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('diligencia-modal-overlay')) document.getElementById('diligencia-modal-overlay').classList.add('hidden');
 });
 document.getElementById('dilig-salvar').addEventListener('click', async () => {
   if (!registroAtualFicha) return;
@@ -1398,7 +1410,11 @@ async function carregarDiligencias() {
         e.stopPropagation();
         const card = e.target.closest('.dilig-card');
         const linhaDiligencia = card.getAttribute('data-linha');
-        if (!confirm('Marcar esta diligência como concluída?')) return;
+        const confirmado = await mostrarModalDuplicidade(
+          '<div>Tem certeza que deseja marcar esta diligência como concluída? Ela sairá da sua lista.</div>',
+          { titulo: 'Concluir diligência', subtitulo: '', textoCancelar: 'Cancelar', textoContinuar: 'Concluir' }
+        );
+        if (!confirmado) return;
         try {
           await fetch(API_URL, {
             method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1415,7 +1431,7 @@ async function carregarDiligencias() {
   }
 }
 
-const editarPainel = document.getElementById('editar-painel');
+const editarPainel = document.getElementById('editar-modal-overlay');
 const editResultado = document.getElementById('edit-resultado');
 const editBlocoPadrao = document.getElementById('edit-bloco-padrao');
 const editBlocoContratoTemp = document.getElementById('edit-bloco-contrato-temp');
@@ -1481,6 +1497,7 @@ document.getElementById('ficha-editar-toggle').addEventListener('click', () => {
   migrarPainel.classList.add('hidden');
 });
 document.getElementById('edit-cancelar').addEventListener('click', () => editarPainel.classList.add('hidden'));
+editarPainel.addEventListener('click', (e) => { if (e.target === editarPainel) editarPainel.classList.add('hidden'); });
 
 document.getElementById('edit-salvar').addEventListener('click', async () => {
   if (!registroAtualFicha) return;
