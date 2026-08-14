@@ -43,6 +43,10 @@
   button.primary { background: #1B3A5C; color: #FFFFFF; border-color: #1B3A5C; }
   button.outline-blue { background: #FFFFFF; color: #1B3A5C; border-color: #1B3A5C; }
   button.gold { background: #B8862B; color: #FFFFFF; border-color: #B8862B; }
+  .dash-cat-row { display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:12.5px; background:#F7F5F1; padding:6px 10px; border-radius:6px; margin-bottom:6px; }
+  .categoria-modal-item { display:flex; align-items:center; gap:10px; padding:11px 14px; margin:2px 6px; border-radius:8px; cursor:pointer; font-size:13px; color:#2C2C2A; transition:background 0.12s; }
+  .categoria-modal-item:hover { background:#F1EFE8; }
+  .checkbox-categoria-label { display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:400; margin:0; background:#F7F5F1; padding:8px 12px; border-radius:6px; cursor:pointer; border:1px solid #E4E0D4; }
 
   /* =====================================================================
      MODO ESCURO — ativado com a classe "dark-mode" no <body>
@@ -52,17 +56,35 @@
   body.dark-mode .bloco-flutuante,
   body.dark-mode .card,
   body.dark-mode .steps,
-  body.dark-mode .box,
-  body.dark-mode .result-card,
   body.dark-mode .warn-box {
     background: #21242B !important; border-color: #34383F !important; color: #E4E2DC !important;
   }
-  body.dark-mode .row[style*="background:#F7F5F1"],
-  body.dark-mode div[style*="background:#F7F5F1"],
-  body.dark-mode div[style*="background: #F7F5F1"] { background: #262A31 !important; }
+  /* Caixas genéricas (.box) sem cor própria ficam transparentes, mostrando o
+     fundo escuro do card por baixo. Cards com cor própria (ex.: KPIs verde/
+     vermelho/amarelo) NÃO são forçados — mantêm a cor original, igual ao modo claro. */
+  body.dark-mode .box { border-color: #34383F !important; }
+  body.dark-mode .dash-cat-row { display:flex; justify-content:space-between; padding:6px 10px; border-radius:6px; margin-bottom:6px; font-size:12.5px; background:#262A31 !important; color:#E4E2DC !important; }
+  body.dark-mode .categoria-modal-item { color: #E4E2DC !important; }
+  body.dark-mode .categoria-modal-item:hover { background: #2A2E36 !important; }
+  body.dark-mode .checkbox-categoria-label { background:#262A31 !important; color:#E4E2DC !important; border-color:#40444D !important; }
+  body.dark-mode .titulo-lateral { color: #8FBEEA !important; }
+  /* Cobertura ampla: qualquer texto/borda azul-marinho (títulos de painéis,
+     botões, "Vínculo 1/2", ficha impressa, etc.) fica num azul claro legível */
+  body.dark-mode [style*="color:#1B3A5C"],
+  body.dark-mode [style*="color: #1B3A5C"] { color: #8FBEEA !important; }
+  body.dark-mode [style*="border-color:#1B3A5C"],
+  body.dark-mode [style*="border-color: #1B3A5C"] { border-color: #6FA8DC !important; }
+  /* Botão/título de diligência (marrom) */
+  body.dark-mode [style*="color:#8B4513"] { color: #E0A96D !important; }
+  body.dark-mode [style*="border-color:#8B4513"] { border-color: #E0A96D !important; }
+  /* Textos de aviso (warn-box), sem afetar os cartões coloridos de KPI */
+  body.dark-mode .warn-box [style*="color:#85560B"],
+  body.dark-mode .warn-box [style*="color:#633806"],
+  body.dark-mode .warn-box [style*="color:#854F0B"] { color: #E8C77A !important; }
   body.dark-mode .card, body.dark-mode .bloco-flutuante .card { color: #E4E2DC; }
   body.dark-mode h2.section-title { color: #E8C77A; }
   body.dark-mode p.section-sub, body.dark-mode label, body.dark-mode .muted { color: #9B9C9F !important; }
+  body.dark-mode .step-label.active { color: #8FBEEA !important; }
   body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
     background: #2A2E36 !important; color: #E4E2DC !important; border-color: #40444D !important;
   }
@@ -172,7 +194,7 @@
 
   <div class="coluna-diligencias">
     <div class="card bloco-flutuante" style="padding:18px 20px; border:1px solid #E4E0D4; border-radius:12px;">
-      <p style="margin:0 0 2px; font-size:13px; font-weight:500; color:#1B3A5C;"><i class="ti ti-gavel"></i> Diligências CGDF/TCDF</p>
+      <p class="titulo-lateral" style="margin:0 0 2px; font-size:13px; font-weight:500; color:#1B3A5C;"><i class="ti ti-gavel"></i> Diligências CGDF/TCDF</p>
       <p style="margin:0 0 14px; font-size:10.5px; color:#8A897F;">Processos que você sinalizou, por prazo de vencimento</p>
       <div id="dilig-loading" style="font-size:12px; color:#6B6A62; padding:8px 0;">Carregando...</div>
       <div id="dilig-lista"></div>
@@ -682,7 +704,7 @@
 
   <div class="coluna-dashboard" id="coluna-dashboard-el">
     <div class="card bloco-flutuante" style="padding:18px 20px; border:1px solid #E4E0D4; border-radius:12px;">
-      <p style="margin:0 0 2px; font-size:13px; font-weight:500; color:#1B3A5C;">Estatística</p>
+      <p class="titulo-lateral" style="margin:0 0 2px; font-size:13px; font-weight:500; color:#1B3A5C;">Estatística</p>
       <p style="margin:0 0 14px; font-size:10.5px; color:#8A897F;">Atualiza a cada 5 minutos</p>
       <div id="dash-loading" style="font-size:12px; color:#6B6A62; padding:8px 0;">Carregando...</div>
       <div id="dash-conteudo" class="hidden">
@@ -1062,10 +1084,8 @@ const categoriaModalLista = document.getElementById('categoria-modal-lista');
 
 CATEGORIAS_MODAL.forEach(cat => {
   const item = document.createElement('div');
-  item.style.cssText = 'display:flex; align-items:center; gap:10px; padding:11px 14px; margin:2px 6px; border-radius:8px; cursor:pointer; font-size:13px; color:#2C2C2A; transition:background 0.12s;';
+  item.className = 'categoria-modal-item';
   item.innerHTML = '<i class="ti ' + cat.icone + '" style="font-size:17px; color:#1B3A5C;"></i> ' + esc(cat.rotulo);
-  item.addEventListener('mouseenter', () => item.style.background = '#F1EFE8');
-  item.addEventListener('mouseleave', () => item.style.background = '');
   item.addEventListener('click', () => {
     categoriaModalOverlay.classList.add('hidden');
     resetFormularioCadastro();
@@ -1809,7 +1829,8 @@ function renderPontoCargos() {
         const p = cargo.periods[key];
         const diasPreenchidos = Object.keys(p.dias || {}).filter(d => p.dias[d].entrada || p.dias[d].naoTrabalhou).length;
         const row = document.createElement('div');
-        row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:12.5px; background:#F7F5F1; padding:6px 10px; border-radius:8px;';
+        row.className = 'dash-cat-row';
+        row.style.justifyContent = 'space-between';
         row.innerHTML = '<span><i class="ti ti-calendar-check" style="color:#3B6D11;"></i> ' + key + ' <span class="muted">· ' + diasPreenchidos + ' dia(s)' + (p.filename ? ' · ' + p.filename : ' · sem folha') + '</span></span>' +
           '<span style="display:flex; gap:10px;"><i class="ti ti-pencil edit-period" style="cursor:pointer;"></i><i class="ti ti-x remove-period" style="cursor:pointer;"></i></span>';
         row.querySelector('.remove-period').onclick = () => { delete cargo.periods[key]; renderSummary(); };
@@ -1946,7 +1967,7 @@ async function carregarDashboard() {
     porCategoriaDiv.innerHTML = '';
     Object.keys(data.porCategoria || {}).forEach(cat => {
       const row = document.createElement('div');
-      row.style.cssText = 'display:flex; justify-content:space-between; padding:6px 10px; background:#F7F5F1; border-radius:6px; margin-bottom:6px; font-size:12.5px;';
+      row.className = 'dash-cat-row';
       row.innerHTML = '<span>' + esc(cat) + '</span><strong>' + data.porCategoria[cat] + '</strong>';
       porCategoriaDiv.appendChild(row);
     });
@@ -2160,7 +2181,7 @@ const contCheckboxes = document.getElementById('cont-checkboxes');
 TODAS_CATEGORIAS.forEach((cat, i) => {
   const id = 'cont-cb-' + i;
   const label = document.createElement('label');
-  label.style.cssText = 'display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:400; margin:0; background:#F7F5F1; padding:8px 12px; border-radius:6px; cursor:pointer; border:1px solid #E4E0D4;';
+  label.className = 'checkbox-categoria-label';
   label.innerHTML = '<input type="checkbox" id="' + id + '" value="' + cat + '" checked style="width:auto; margin:0;"> ' + cat;
   contCheckboxes.appendChild(label);
 });
