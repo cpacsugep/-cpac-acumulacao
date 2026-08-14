@@ -43,6 +43,51 @@
   button.primary { background: #1B3A5C; color: #FFFFFF; border-color: #1B3A5C; }
   button.outline-blue { background: #FFFFFF; color: #1B3A5C; border-color: #1B3A5C; }
   button.gold { background: #B8862B; color: #FFFFFF; border-color: #B8862B; }
+
+  /* =====================================================================
+     MODO ESCURO — ativado com a classe "dark-mode" no <body>
+     ===================================================================== */
+  body.dark-mode { background: #16181C; color: #E4E2DC; }
+  body.dark-mode .header { background: #0F2438; box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+  body.dark-mode .bloco-flutuante,
+  body.dark-mode .card,
+  body.dark-mode .steps,
+  body.dark-mode .box,
+  body.dark-mode .result-card,
+  body.dark-mode .warn-box {
+    background: #21242B !important; border-color: #34383F !important; color: #E4E2DC !important;
+  }
+  body.dark-mode .row[style*="background:#F7F5F1"],
+  body.dark-mode div[style*="background:#F7F5F1"],
+  body.dark-mode div[style*="background: #F7F5F1"] { background: #262A31 !important; }
+  body.dark-mode .card, body.dark-mode .bloco-flutuante .card { color: #E4E2DC; }
+  body.dark-mode h2.section-title { color: #E8C77A; }
+  body.dark-mode p.section-sub, body.dark-mode label, body.dark-mode .muted { color: #9B9C9F !important; }
+  body.dark-mode input, body.dark-mode select, body.dark-mode textarea {
+    background: #2A2E36 !important; color: #E4E2DC !important; border-color: #40444D !important;
+  }
+  body.dark-mode input::placeholder { color: #6B6E75; }
+  body.dark-mode button { background: #2A2E36; color: #E4E2DC; border-color: #40444D; }
+  body.dark-mode button.primary { background: #2E5C8A; border-color: #2E5C8A; color: #FFFFFF; }
+  body.dark-mode button.outline-blue { background: transparent; color: #6FA8DC; border-color: #6FA8DC; }
+  body.dark-mode button.gold { background: #B8862B; border-color: #B8862B; color: #FFFFFF; }
+  body.dark-mode .step-circle { background: #3A3E46; color: #B9BABD; }
+  body.dark-mode .step-line { background: #3A3E46; }
+  body.dark-mode table { color: #E4E2DC; }
+  body.dark-mode th { background: #2A2E36 !important; color: #E4E2DC !important; }
+  body.dark-mode td, body.dark-mode tr { border-color: #34383F !important; }
+  body.dark-mode #dup-modal-overlay > div,
+  body.dark-mode #categoria-modal-overlay > div,
+  body.dark-mode #editar-modal-overlay .box,
+  body.dark-mode #migrar-modal-overlay .warn-box,
+  body.dark-mode #diligencia-modal-overlay .box,
+  body.dark-mode #login-overlay > div,
+  body.dark-mode #alerta-painel {
+    background: #21242B !important; color: #E4E2DC !important;
+  }
+  body.dark-mode #dup-modal-lista { background: #2A2E36 !important; }
+  body.dark-mode .badge { background: #2E4A2E; color: #A8D5A8; }
+  #tema-toggle { display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.12); cursor:pointer; border:none; }
   .row { display: flex; gap: 10px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .box { border: 1px solid #E4E0D4; border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; }
@@ -104,6 +149,9 @@
       <p class="subtitle">SEEDF · Comissão Permanente de Acumulação de Cargos</p>
     </div>
     <div style="display:flex; align-items:center; gap:16px;">
+      <button type="button" id="tema-toggle" title="Alternar tema claro/escuro">
+        <span id="tema-icone" style="font-size:17px; line-height:1;">🌙</span>
+      </button>
       <div id="alerta-sino" style="position:relative; cursor:pointer; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center;" title="Processos vencendo em breve">
         <span style="font-size:18px; line-height:1;">🔔</span>
         <span id="alerta-badge" class="hidden" style="position:absolute; top:-4px; right:-4px; background:#C0392B; color:#fff; font-size:10px; font-weight:600; border-radius:10px; padding:1px 5px; min-width:16px; text-align:center; box-shadow:0 0 0 2px #1B3A5C;">0</span>
@@ -756,6 +804,21 @@ document.getElementById('logout-link').addEventListener('click', async () => {
   currentUser = null;
   location.reload();
 });
+
+// ---------------------------------------------------------------------
+// MODO CLARO / ESCURO
+// ---------------------------------------------------------------------
+function aplicarTemaSalvo() {
+  const temaSalvo = localStorage.getItem('cpac_tema') || 'claro';
+  document.body.classList.toggle('dark-mode', temaSalvo === 'escuro');
+  document.getElementById('tema-icone').textContent = temaSalvo === 'escuro' ? '☀️' : '🌙';
+}
+document.getElementById('tema-toggle').addEventListener('click', () => {
+  const escuroAtivo = document.body.classList.toggle('dark-mode');
+  localStorage.setItem('cpac_tema', escuroAtivo ? 'escuro' : 'claro');
+  document.getElementById('tema-icone').textContent = escuroAtivo ? '☀️' : '🌙';
+});
+aplicarTemaSalvo();
 
 window.addEventListener('load', () => {
   const salvo = sessionStorage.getItem('cpac_user');
