@@ -446,6 +446,7 @@
       <div id="editar-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(44,44,42,0.35); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:1500; padding:20px;">
       <div class="box" style="max-width:560px; width:100%; max-height:85vh; overflow-y:auto; box-shadow:0 16px 40px rgba(0,0,0,0.25); background:#FFFFFF;">
         <p style="margin:0 0 10px; font-size:13px; font-weight:500; color:#1B3A5C;">Alterar dados do processo</p>
+        <div style="margin-bottom:14px;"><label>Número do processo</label><input id="edit-processo" type="text"></div>
 
         <!-- Padrão: SEDF + SEDF e SEDF + OUTRO -->
         <div id="edit-bloco-padrao">
@@ -1541,6 +1542,7 @@ document.getElementById('ficha-editar-toggle').addEventListener('click', () => {
   editBlocoContratoTemp.classList.add('hidden');
   editBlocoEncerrado.classList.add('hidden');
   editBlocoSubJudice.classList.add('hidden');
+  document.getElementById('edit-processo').value = r.processo || '';
 
   if (r.categoria === 'CONTRATO TEMPORÁRIO') {
     editBlocoContratoTemp.classList.remove('hidden');
@@ -1686,6 +1688,10 @@ document.getElementById('edit-salvar').addEventListener('click', async () => {
       unigep2: r.categoria === 'SEDF + SEDF' ? orgaoOuUnigep : r.unigep2
     };
   }
+
+  const processoEditado = document.getElementById('edit-processo').value.trim();
+  body.processo = processoEditado;
+  atualizacoesMemoria.processo = processoEditado;
 
   const btn = document.getElementById('edit-salvar');
   btn.disabled = true; btn.textContent = 'Salvando...';
