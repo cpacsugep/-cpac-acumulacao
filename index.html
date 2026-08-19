@@ -48,6 +48,8 @@
   .categoria-modal-item:hover { background:#F1EFE8; }
   .checkbox-categoria-label { display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:400; margin:0; background:#F7F5F1; padding:8px 12px; border-radius:6px; cursor:pointer; border:1px solid #E4E0D4; }
   .bloco-parecer { background:#F7F5F1; border-radius:6px; padding:12px 14px; font-size:12.5px; line-height:1.6; color:#2C2C2A; }
+  .lista-categoria-item:hover { background: #F1EFE8; }
+  .lista-categoria-item.linha-selecionada { background: #EAF3DE !important; }
 
   /* =====================================================================
      MODO ESCURO — ativado com a classe "dark-mode" no <body>
@@ -69,6 +71,9 @@
   body.dark-mode .categoria-modal-item:hover { background: #131313 !important; }
   body.dark-mode .checkbox-categoria-label { background:#131313 !important; color:#E4E2DC !important; border-color:#40444D !important; }
   body.dark-mode .bloco-parecer { background:#131313 !important; color:#E4E2DC !important; }
+  body.dark-mode .lista-categoria-item:hover { background: #131313 !important; }
+  body.dark-mode .lista-categoria-item.linha-selecionada { background: #1E3A24 !important; }
+  body.dark-mode .lista-categoria-item { border-bottom-color: #34383F !important; }
   /* Cobertura ampla: qualquer fundo cinza-claro fixo (barra de navegação,
      caixas de resumo, listas de modal, ficha impressa) fica escuro também */
   body.dark-mode [style*="background:#F7F5F1"],
@@ -84,6 +89,7 @@
   body.dark-mode [style*="color: #1B3A5C"] { color: #8FBEEA !important; }
   body.dark-mode [style*="border-color:#1B3A5C"],
   body.dark-mode [style*="border-color: #1B3A5C"] { border-color: #6FA8DC !important; }
+  body.dark-mode [style*="color:#6B6A62"] { color: #9B9C9F !important; }
   /* Botão/título de diligência (marrom) */
   body.dark-mode [style*="color:#8B4513"] { color: #E0A96D !important; }
   body.dark-mode [style*="border-color:#8B4513"] { border-color: #E0A96D !important; }
@@ -110,6 +116,7 @@
   body.dark-mode td, body.dark-mode tr { border-color: #34383F !important; }
   body.dark-mode #dup-modal-overlay > div,
   body.dark-mode #categoria-modal-overlay > div,
+  body.dark-mode #lista-categoria-modal-overlay > div,
   body.dark-mode #editar-modal-overlay .box,
   body.dark-mode #migrar-modal-overlay .warn-box,
   body.dark-mode #diligencia-modal-overlay .box,
@@ -162,6 +169,26 @@
     <div style="padding:8px 14px 4px;">
       <button type="button" id="categoria-modal-cancelar" style="width:100%; font-size:12.5px; padding:8px;">Cancelar</button>
     </div>
+  </div>
+</div>
+
+<div id="lista-categoria-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(44,44,42,0.35); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:2000; padding:20px;">
+  <div style="background:#FFFFFF; border-radius:14px; padding:20px; width:1100px; max-width:100%; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 16px 40px rgba(0,0,0,0.3);">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+      <p id="lista-categoria-titulo" style="margin:0; font-size:14px; font-weight:500; color:#1B3A5C;">Categoria</p>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="display:flex; align-items:center; gap:4px; background:#F1EFE8; border-radius:6px; padding:2px;">
+          <button type="button" id="lista-categoria-zoom-menos" style="padding:3px 9px; font-size:13px;">−</button>
+          <span id="lista-categoria-zoom-nivel" style="font-size:11px; color:#6B6A62; width:34px; text-align:center;">100%</span>
+          <button type="button" id="lista-categoria-zoom-mais" style="padding:3px 9px; font-size:13px;">+</button>
+        </div>
+        <span id="lista-categoria-fechar" style="cursor:pointer; font-size:20px; color:#8A897F; line-height:1;">&times;</span>
+      </div>
+    </div>
+    <input id="lista-categoria-busca" type="text" placeholder="Buscar por nome dentro desta lista..." style="margin-bottom:12px;">
+    <div id="lista-categoria-loading" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Carregando...</div>
+    <div id="lista-categoria-resultado" style="font-size:11.5px; color:#8A897F; margin-bottom:8px;"></div>
+    <div id="lista-categoria-conteudo" style="overflow-y:auto; flex:1;"></div>
   </div>
 </div>
 
@@ -1988,7 +2015,9 @@ async function carregarDashboard() {
     Object.keys(data.porCategoria || {}).forEach(cat => {
       const row = document.createElement('div');
       row.className = 'dash-cat-row';
+      row.style.cursor = 'pointer';
       row.innerHTML = '<span>' + esc(cat) + '</span><strong>' + data.porCategoria[cat] + '</strong>';
+      row.addEventListener('click', () => abrirListaCategoria(cat));
       porCategoriaDiv.appendChild(row);
     });
 
@@ -2005,6 +2034,173 @@ async function carregarDashboard() {
     loading.classList.add('hidden');
   }
 }
+
+// ---------------------------------------------------------------------
+// LISTAGEM COMPLETA DE UMA CATEGORIA (ao clicar em "Por categoria" no dashboard)
+// ---------------------------------------------------------------------
+let ultimaListaCategoria = [];
+let categoriaAtualLista = '';
+
+// Colunas exibidas por categoria, na mesma ordem da planilha
+function colunasBase(comUnigep1) {
+  return [
+    { campo: 'processo', rotulo: 'Processo' },
+    { campo: 'nome', rotulo: 'Nome' },
+    { campo: 'cargo1', rotulo: 'Cargo 1' },
+    { campo: 'mat1', rotulo: 'Mat. 1' },
+    { campo: 'ch1', rotulo: 'CH 1' }
+  ].concat(comUnigep1 ? [{ campo: 'unigep1', rotulo: 'Unigep 1' }] : []);
+}
+function colunasEncerrado() {
+  return [
+    { campo: 'processo', rotulo: 'Processo' },
+    { campo: 'nome', rotulo: 'Nome' },
+    { campo: 'cargo1', rotulo: 'Cargo 1' },
+    { campo: 'mat1', rotulo: 'Mat. 1' },
+    { campo: 'ch1', rotulo: 'CH 1' },
+    { campo: 'cargo2', rotulo: 'Cargo 2' },
+    { campo: 'mat2', rotulo: 'Mat. 2' },
+    { campo: 'orgao2', rotulo: 'Órgão 2' },
+    { campo: 'ch2', rotulo: 'CH 2' },
+    { campo: 'parecer', rotulo: 'Parecer' },
+    { campo: 'observacao', rotulo: 'Observação' },
+    { campo: 'status', rotulo: 'Status' }
+  ];
+}
+const COLUNAS_CATEGORIA = {
+  'SEDF + SEDF': colunasBase(true).concat([
+    { campo: 'cargo2', rotulo: 'Cargo 2' }, { campo: 'mat2', rotulo: 'Mat. 2' }, { campo: 'ch2', rotulo: 'CH 2' },
+    { campo: 'unigep2', rotulo: 'Unigep 2' }, { campo: 'atribuicao', rotulo: 'Atribuição' },
+    { campo: 'parecer', rotulo: 'Parecer' }, { campo: 'acompanhamentoAnual', rotulo: 'Acomp. Anual' },
+    { campo: 'observacao', rotulo: 'Observação' }, { campo: 'status', rotulo: 'Status' }
+  ]),
+  'SEDF + OUTRO': colunasBase(false).concat([
+    { campo: 'cargo2', rotulo: 'Cargo 2' }, { campo: 'mat2', rotulo: 'Mat. 2' }, { campo: 'orgao2', rotulo: 'Órgão 2' },
+    { campo: 'ch2', rotulo: 'CH 2' }, { campo: 'unigep1', rotulo: 'Unigep 1' }, { campo: 'atribuicao', rotulo: 'Atribuição' },
+    { campo: 'parecer', rotulo: 'Parecer' }, { campo: 'acompanhamentoAnual', rotulo: 'Acomp. Anual' },
+    { campo: 'observacao', rotulo: 'Observação' }, { campo: 'status', rotulo: 'Status' }
+  ]),
+  'SUB JUDICE / CORREGEDORIA': colunasBase(true).concat([
+    { campo: 'cargo2', rotulo: 'Cargo 2' }, { campo: 'mat2', rotulo: 'Mat. 2' }, { campo: 'ch2', rotulo: 'CH 2' },
+    { campo: 'orgao2', rotulo: 'Órgão 2' }, { campo: 'atribuicao', rotulo: 'Atribuição' },
+    { campo: 'parecer', rotulo: 'Parecer' }, { campo: 'observacao', rotulo: 'Observação' }, { campo: 'status', rotulo: 'Status' }
+  ]),
+  'PERDA DE OBJETO': colunasEncerrado(),
+  'PENSÃO': colunasEncerrado(),
+  'APOSENTADORIA / RESERVA': colunasEncerrado(),
+  'CONTRATO TEMPORÁRIO': [
+    { campo: 'ano', rotulo: 'Ano' }, { campo: 'processo', rotulo: 'Processo' }, { campo: 'mat1', rotulo: 'Mat. Temp.' },
+    { campo: 'nome', rotulo: 'Nome' }, { campo: 'cargo2', rotulo: 'Cargo (outro vínculo)' },
+    { campo: 'orgao2', rotulo: 'Órgão (outro vínculo)' }, { campo: 'parecer', rotulo: 'Parecer' },
+    { campo: 'observacao', rotulo: 'Observação' }, { campo: 'status', rotulo: 'Status' }
+  ]
+};
+
+async function abrirListaCategoria(categoria) {
+  const overlay = document.getElementById('lista-categoria-modal-overlay');
+  const loading = document.getElementById('lista-categoria-loading');
+  const conteudo = document.getElementById('lista-categoria-conteudo');
+  const resultadoInfo = document.getElementById('lista-categoria-resultado');
+  const busca = document.getElementById('lista-categoria-busca');
+
+  categoriaAtualLista = categoria;
+  zoomListaCategoria = 100;
+  document.getElementById('lista-categoria-zoom-nivel').textContent = '100%';
+  document.getElementById('lista-categoria-titulo').textContent = categoria;
+  busca.value = '';
+  conteudo.innerHTML = '';
+  resultadoInfo.textContent = '';
+  overlay.classList.remove('hidden');
+  loading.classList.remove('hidden');
+
+  try {
+    const resp = await fetch(API_URL + '?action=listarCategoria&categoria=' + encodeURIComponent(categoria));
+    const data = await resp.json();
+    if (data.erro) throw new Error(data.erro);
+    ultimaListaCategoria = data.resultados || [];
+    renderizarListaCategoria(ultimaListaCategoria);
+  } catch (err) {
+    conteudo.innerHTML = '<div class="box" style="border-color:#D98C8C;"><p style="margin:0; font-size:13px; color:#A33;">Erro ao carregar: ' + esc(err.message) + '</p></div>';
+  } finally {
+    loading.classList.add('hidden');
+  }
+}
+
+let zoomListaCategoria = 100; // porcentagem
+let idxSelecionadoLista = null;
+
+function renderizarListaCategoria(lista) {
+  const conteudo = document.getElementById('lista-categoria-conteudo');
+  const resultadoInfo = document.getElementById('lista-categoria-resultado');
+  resultadoInfo.textContent = lista.length + ' registro(s) — clique para selecionar, duplo clique para abrir a ficha';
+
+  if (!lista.length) {
+    conteudo.innerHTML = '<p class="muted" style="margin:0; font-size:13px; text-align:center; padding:20px 0;">Nenhum registro encontrado.</p>';
+    return;
+  }
+
+  const colunas = COLUNAS_CATEGORIA[categoriaAtualLista] || [
+    { campo: 'processo', rotulo: 'Processo' }, { campo: 'nome', rotulo: 'Nome' }
+  ];
+  const fonteBase = 11.5 * (zoomListaCategoria / 100);
+
+  let html = '<table style="width:100%; table-layout:fixed; border-collapse:collapse; font-size:' + fonteBase + 'px;">' +
+    '<thead style="position:sticky; top:0; background:#F1EFE8; z-index:1;"><tr style="text-align:left;">' +
+    colunas.map(c => '<th style="padding:6px 7px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + esc(c.rotulo) + '</th>').join('') +
+    '</tr></thead><tbody>';
+
+  lista.forEach((r, i) => {
+    html += '<tr class="lista-categoria-item" data-idx="' + i + '" style="border-top:1px solid #E4E0D4; cursor:pointer;">';
+    colunas.forEach(c => {
+      html += '<td style="padding:5px 7px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="' + esc(r[c.campo]) + '">' + esc(r[c.campo]) + '</td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  conteudo.innerHTML = html;
+  idxSelecionadoLista = null;
+
+  conteudo.querySelectorAll('.lista-categoria-item').forEach(el => {
+    el.addEventListener('click', () => {
+      conteudo.querySelectorAll('.lista-categoria-item').forEach(e2 => e2.classList.remove('linha-selecionada'));
+      el.classList.add('linha-selecionada');
+      idxSelecionadoLista = parseInt(el.getAttribute('data-idx'), 10);
+    });
+    el.addEventListener('dblclick', () => {
+      const registro = lista[parseInt(el.getAttribute('data-idx'), 10)];
+      document.getElementById('lista-categoria-modal-overlay').classList.add('hidden');
+      mostrarAreaPrincipal('cadastro');
+      renderFicha(registro);
+      showView('view-ficha');
+    });
+  });
+}
+
+document.getElementById('lista-categoria-zoom-menos').addEventListener('click', () => {
+  zoomListaCategoria = Math.max(60, zoomListaCategoria - 10);
+  document.getElementById('lista-categoria-zoom-nivel').textContent = zoomListaCategoria + '%';
+  renderizarListaCategoria(ultimaListaCategoria);
+});
+document.getElementById('lista-categoria-zoom-mais').addEventListener('click', () => {
+  zoomListaCategoria = Math.min(150, zoomListaCategoria + 10);
+  document.getElementById('lista-categoria-zoom-nivel').textContent = zoomListaCategoria + '%';
+  renderizarListaCategoria(ultimaListaCategoria);
+});
+
+document.getElementById('lista-categoria-busca').addEventListener('input', (e) => {
+  const termo = removerAcentosClient(e.target.value.toLowerCase().trim());
+  const filtrada = termo
+    ? ultimaListaCategoria.filter(r => removerAcentosClient(String(r.nome || '').toLowerCase()).includes(termo))
+    : ultimaListaCategoria;
+  renderizarListaCategoria(filtrada);
+});
+
+document.getElementById('lista-categoria-fechar').addEventListener('click', () => {
+  document.getElementById('lista-categoria-modal-overlay').classList.add('hidden');
+});
+document.getElementById('lista-categoria-modal-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'lista-categoria-modal-overlay') e.currentTarget.classList.add('hidden');
+});
 
 // ---------------------------------------------------------------------
 // ALERTA: processos sem parecer emitido (sino no cabeçalho)
