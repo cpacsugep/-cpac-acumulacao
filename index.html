@@ -593,6 +593,7 @@
           </div>
           <div><label>Data do fato (opcional)</label><input id="mig-data-fato" type="text" placeholder="dd/mm/aaaa"></div>
         </div>
+        <div style="margin-bottom:12px;"><label>Novo parecer emitido (opcional — se já houver um novo, referente à migração)</label><input id="mig-parecer" type="text" placeholder="Ex.: PARECER SEI-GDF N.º 000/2026"></div>
         <div style="margin-bottom:12px;"><label>Observação extra (opcional)</label><input id="mig-obs-extra" type="text"></div>
         <div style="display:flex; justify-content:flex-end; gap:8px;">
           <button type="button" id="mig-cancelar">Cancelar</button>
@@ -1736,6 +1737,7 @@ document.getElementById('mig-confirmar').addEventListener('click', async () => {
   const categoriaDestino = document.getElementById('mig-destino').value;
   const motivo = document.getElementById('mig-motivo').value;
   const dataFato = document.getElementById('mig-data-fato').value.trim();
+  const novoParecer = document.getElementById('mig-parecer').value.trim();
 
   const resumoHtml =
     '<div style="margin-bottom:6px;"><strong>Servidor:</strong> ' + esc(registroAtualFicha.nome) + '</div>' +
@@ -1743,6 +1745,7 @@ document.getElementById('mig-confirmar').addEventListener('click', async () => {
     '<div style="margin-bottom:6px;"><strong>Para:</strong> ' + esc(categoriaDestino) + '</div>' +
     '<div style="margin-bottom:6px;"><strong>Motivo:</strong> ' + esc(motivo) + '</div>' +
     (dataFato ? '<div style="margin-bottom:6px;"><strong>Data do fato:</strong> ' + esc(dataFato) + '</div>' : '') +
+    (novoParecer ? '<div style="margin-bottom:6px;"><strong>Novo parecer:</strong> ' + esc(novoParecer) + '</div>' : '') +
     '<div style="margin-top:10px; color:#A33;"><i class="ti ti-alert-circle"></i> Esta ação apaga a linha da aba de origem — não é possível desfazer automaticamente.</div>';
 
   const confirmado = await mostrarModalDuplicidade(resumoHtml, {
@@ -1761,6 +1764,7 @@ document.getElementById('mig-confirmar').addEventListener('click', async () => {
     motivo: motivo,
     cargoAlvo: document.getElementById('mig-cargo-alvo').value,
     dataFato: dataFato,
+    parecer: novoParecer,
     observacaoExtra: obsComUsuario
   };
   const btn = document.getElementById('mig-confirmar');
