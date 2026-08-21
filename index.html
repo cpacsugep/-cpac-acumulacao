@@ -50,10 +50,10 @@
   .bloco-parecer { background:#F7F5F1; border-radius:6px; padding:12px 14px; font-size:12.5px; line-height:1.6; color:#2C2C2A; }
   .lista-categoria-item:hover { background: #F1EFE8; }
   .lista-categoria-item.linha-selecionada { background: #EAF3DE !important; }
-  .report-card { flex:1; min-width:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:20px 14px; border:1px solid #E4E0D4; border-radius:10px; cursor:pointer; background:#FFFFFF; transition:box-shadow 0.15s, transform 0.1s; text-align:center; }
+  .report-card { width:150px; height:150px; flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:16px; border:1px solid #E4E0D4; border-radius:12px; cursor:pointer; background:#FFFFFF; transition:box-shadow 0.15s, transform 0.1s; text-align:center; }
   .report-card:hover { box-shadow:0 4px 14px rgba(27,58,92,0.12); transform:translateY(-2px); }
-  .report-card i { font-size:24px; color:#1B3A5C; }
-  .report-card span { font-size:12.5px; font-weight:500; color:#2C2C2A; }
+  .report-card i { font-size:32px; color:#1B3A5C; }
+  .report-card span { font-size:12px; font-weight:600; color:#2C2C2A; text-transform:uppercase; letter-spacing:0.3px; line-height:1.3; }
   .report-dropdown { position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:8px; background:#FFFFFF; border:1px solid #E4E0D4; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.18); padding:12px; width:200px; z-index:50; text-align:left; cursor:default; }
   .dropdown-opcao { padding:8px 10px; border-radius:6px; cursor:pointer; font-size:12.5px; }
   .dropdown-opcao:hover { background:#F1EFE8; }
@@ -127,6 +127,8 @@
   body.dark-mode td, body.dark-mode tr { border-color: #34383F !important; }
   body.dark-mode #dup-modal-overlay > div,
   body.dark-mode #categoria-modal-overlay > div,
+  body.dark-mode #analista-modal-overlay > div,
+  body.dark-mode #contagem-modal-overlay > div,
   body.dark-mode #lista-categoria-modal-overlay > div,
   body.dark-mode #editar-modal-overlay .box,
   body.dark-mode #migrar-modal-overlay .warn-box,
@@ -182,6 +184,34 @@
     </div>
   </div>
 </div>
+
+<div id="analista-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(44,44,42,0.35); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:2000;">
+  <div style="background:#FFFFFF; border-radius:14px; padding:10px; width:340px; max-width:90%; box-shadow:0 16px 40px rgba(0,0,0,0.3);">
+    <p style="margin:10px 14px 8px; font-size:13px; font-weight:500; color:#1B3A5C;">Escolha o analista</p>
+    <div id="analista-modal-lista"></div>
+    <div style="padding:8px 14px 4px;">
+      <button type="button" id="analista-modal-cancelar" style="width:100%; font-size:12.5px; padding:8px;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="contagem-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(44,44,42,0.35); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:2000;">
+  <div style="background:#FFFFFF; border-radius:14px; padding:18px; width:320px; max-width:90%; box-shadow:0 16px 40px rgba(0,0,0,0.3);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <p style="margin:0; font-size:13px; font-weight:500; color:#1B3A5C;">Categorias a somar</p>
+      <div style="display:flex; gap:8px;">
+        <span id="cont-selecionar-todas" style="font-size:10.5px; color:#1B3A5C; cursor:pointer; text-decoration:underline;">Todas</span>
+        <span id="cont-limpar-todas" style="font-size:10.5px; color:#6B6A62; cursor:pointer; text-decoration:underline;">Nenhuma</span>
+      </div>
+    </div>
+    <div id="cont-checkboxes" style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px; max-height:260px; overflow-y:auto;"></div>
+    <div style="display:flex; gap:8px;">
+      <button type="button" id="contagem-modal-cancelar" style="flex:1; font-size:12.5px;">Cancelar</button>
+      <button type="button" id="cont-gerar" class="primary" style="flex:1; font-size:12.5px;">Gerar</button>
+    </div>
+  </div>
+</div>
+
 
 <div id="lista-categoria-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(44,44,42,0.35); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:2000; padding:20px;">
   <div style="background:#FFFFFF; border-radius:14px; padding:20px; width:1100px; max-width:100%; max-height:85vh; display:flex; flex-direction:column; box-shadow:0 16px 40px rgba(0,0,0,0.3);">
@@ -679,31 +709,12 @@
   <div id="area-relatorios" class="hidden">
     <div class="card" style="border-radius:0 0 12px 12px;">
 
-      <div class="row" style="gap:12px; flex-wrap:wrap; margin-bottom:24px;">
+      <div class="row" style="gap:14px; flex-wrap:wrap; margin-bottom:24px;">
         <div class="report-card" id="card-todos" data-tipo="todos"><i class="ti ti-list"></i><span>Todos</span></div>
         <div class="report-card" id="card-atrasados" data-tipo="ATRASADO"><i class="ti ti-alert-triangle" style="color:#A33;"></i><span>Atrasados</span></div>
         <div class="report-card" id="card-vencendo" data-tipo="VENCENDO EM BREVE"><i class="ti ti-clock-hour-4" style="color:#85560B;"></i><span>Vencendo em breve</span></div>
-        <div class="report-card" id="card-analista" style="position:relative;"><i class="ti ti-user"></i><span>Por analista</span>
-          <div id="dropdown-analista" class="hidden report-dropdown">
-            <p style="margin:0 0 8px; font-size:11.5px; color:#6B6A62;">Escolha o analista:</p>
-            <div class="dropdown-opcao" data-analista="AUGUSTO">AUGUSTO</div>
-            <div class="dropdown-opcao" data-analista="JESSICA">JESSICA</div>
-            <div class="dropdown-opcao" data-analista="DILCEIA">DILCEIA</div>
-          </div>
-        </div>
-        <div class="report-card" id="card-contagem" style="position:relative;"><i class="ti ti-calculator"></i><span>Contagem de processos</span>
-          <div id="dropdown-contagem" class="hidden report-dropdown" style="width:260px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <p style="margin:0; font-size:11.5px; color:#6B6A62;">Categorias:</p>
-              <div style="display:flex; gap:8px;">
-                <span id="cont-selecionar-todas" style="font-size:10.5px; color:#1B3A5C; cursor:pointer; text-decoration:underline;">Todas</span>
-                <span id="cont-limpar-todas" style="font-size:10.5px; color:#6B6A62; cursor:pointer; text-decoration:underline;">Nenhuma</span>
-              </div>
-            </div>
-            <div id="cont-checkboxes" style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px; max-height:220px; overflow-y:auto;"></div>
-            <button type="button" id="cont-gerar" class="primary" style="width:100%; font-size:12px;">Gerar contagem</button>
-          </div>
-        </div>
+        <div class="report-card" id="card-analista"><i class="ti ti-user"></i><span>Por analista</span></div>
+        <div class="report-card" id="card-contagem"><i class="ti ti-calculator"></i><span>Contagem de processos</span></div>
       </div>
 
       <div id="area-resultado-relatorio" class="report-dropdown" style="position:static; width:100%; transform:none; margin-top:4px; display:none;">
@@ -2242,15 +2253,9 @@ function mostrarSubview(nome) {
   subviewAnalista.classList.toggle('hidden', nome !== 'analista');
 }
 
-function fecharTodosDropdownsRelatorio() {
-  document.getElementById('dropdown-analista').classList.add('hidden');
-  document.getElementById('dropdown-contagem').classList.add('hidden');
-}
-
 // Cards que geram na hora (Todos / Atrasados / Vencendo em breve)
 ['card-todos', 'card-atrasados', 'card-vencendo'].forEach(id => {
   document.getElementById(id).addEventListener('click', () => {
-    fecharTodosDropdownsRelatorio();
     filtroRelatorioAtual = document.getElementById(id).getAttribute('data-tipo');
     const titulos = { 'todos': 'Todos os processos (atrasados + vencendo)', 'ATRASADO': 'Processos atrasados', 'VENCENDO EM BREVE': 'Processos vencendo em breve' };
     document.getElementById('titulo-acompanhamento').textContent = titulos[filtroRelatorioAtual];
@@ -2259,37 +2264,40 @@ function fecharTodosDropdownsRelatorio() {
   });
 });
 
-// Card "Por analista" — abre dropdown para escolher a pessoa
-document.getElementById('card-analista').addEventListener('click', (e) => {
-  e.stopPropagation();
-  const dropdown = document.getElementById('dropdown-analista');
-  const estavaAberto = !dropdown.classList.contains('hidden');
-  fecharTodosDropdownsRelatorio();
-  dropdown.classList.toggle('hidden', estavaAberto);
-});
-document.querySelectorAll('#dropdown-analista .dropdown-opcao').forEach(op => {
-  op.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const analista = op.getAttribute('data-analista');
-    document.getElementById('dropdown-analista').classList.add('hidden');
+// Card "Por analista" — abre modal de tela cheia para escolher a pessoa
+const analistaModalLista = document.getElementById('analista-modal-lista');
+['AUGUSTO', 'JESSICA', 'DILCEIA'].forEach(analista => {
+  const item = document.createElement('div');
+  item.className = 'categoria-modal-item';
+  item.innerHTML = '<i class="ti ti-user" style="font-size:17px; color:#1B3A5C;"></i> ' + analista;
+  item.addEventListener('click', () => {
+    document.getElementById('analista-modal-overlay').classList.add('hidden');
     document.getElementById('titulo-analista').textContent = 'Processos de ' + analista;
     mostrarSubview('analista');
     gerarRelatorioAnalista(analista);
   });
+  analistaModalLista.appendChild(item);
+});
+document.getElementById('card-analista').addEventListener('click', () => {
+  document.getElementById('analista-modal-overlay').classList.remove('hidden');
+});
+document.getElementById('analista-modal-cancelar').addEventListener('click', () => {
+  document.getElementById('analista-modal-overlay').classList.add('hidden');
+});
+document.getElementById('analista-modal-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'analista-modal-overlay') e.currentTarget.classList.add('hidden');
 });
 
-// Card "Contagem de processos" — abre dropdown com checkboxes
-document.getElementById('card-contagem').addEventListener('click', (e) => {
-  e.stopPropagation();
-  const dropdown = document.getElementById('dropdown-contagem');
-  const estavaAberto = !dropdown.classList.contains('hidden');
-  fecharTodosDropdownsRelatorio();
-  dropdown.classList.toggle('hidden', estavaAberto);
+// Card "Contagem de processos" — abre modal de tela cheia com checkboxes
+document.getElementById('card-contagem').addEventListener('click', () => {
+  document.getElementById('contagem-modal-overlay').classList.remove('hidden');
 });
-
-document.addEventListener('click', fecharTodosDropdownsRelatorio);
-document.getElementById('dropdown-analista').addEventListener('click', (e) => e.stopPropagation());
-document.getElementById('dropdown-contagem').addEventListener('click', (e) => e.stopPropagation());
+document.getElementById('contagem-modal-cancelar').addEventListener('click', () => {
+  document.getElementById('contagem-modal-overlay').classList.add('hidden');
+});
+document.getElementById('contagem-modal-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'contagem-modal-overlay') e.currentTarget.classList.add('hidden');
+});
 
 // ---------------------------------------------------------------------
 // RELATÓRIO DE ACOMPANHAMENTO ANUAL
@@ -2416,7 +2424,7 @@ document.getElementById('cont-gerar').addEventListener('click', async (e) => {
     contResultado.innerHTML = '<div class="box"><p class="muted" style="margin:0; font-size:13px;">Selecione ao menos uma categoria.</p></div>';
     return;
   }
-  document.getElementById('dropdown-contagem').classList.add('hidden');
+  document.getElementById('contagem-modal-overlay').classList.add('hidden');
   mostrarSubview('contagem');
   contLoading.classList.remove('hidden');
   contResultado.innerHTML = '';
