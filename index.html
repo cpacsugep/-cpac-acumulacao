@@ -50,6 +50,13 @@
   .bloco-parecer { background:#F7F5F1; border-radius:6px; padding:12px 14px; font-size:12.5px; line-height:1.6; color:#2C2C2A; }
   .lista-categoria-item:hover { background: #F1EFE8; }
   .lista-categoria-item.linha-selecionada { background: #EAF3DE !important; }
+  .report-card { flex:1; min-width:150px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:20px 14px; border:1px solid #E4E0D4; border-radius:10px; cursor:pointer; background:#FFFFFF; transition:box-shadow 0.15s, transform 0.1s; text-align:center; }
+  .report-card:hover { box-shadow:0 4px 14px rgba(27,58,92,0.12); transform:translateY(-2px); }
+  .report-card i { font-size:24px; color:#1B3A5C; }
+  .report-card span { font-size:12.5px; font-weight:500; color:#2C2C2A; }
+  .report-dropdown { position:absolute; top:100%; left:50%; transform:translateX(-50%); margin-top:8px; background:#FFFFFF; border:1px solid #E4E0D4; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.18); padding:12px; width:200px; z-index:50; text-align:left; cursor:default; }
+  .dropdown-opcao { padding:8px 10px; border-radius:6px; cursor:pointer; font-size:12.5px; }
+  .dropdown-opcao:hover { background:#F1EFE8; }
 
   /* =====================================================================
      MODO ESCURO — ativado com a classe "dark-mode" no <body>
@@ -73,6 +80,10 @@
   body.dark-mode .bloco-parecer { background:#131313 !important; color:#E4E2DC !important; }
   body.dark-mode .lista-categoria-item:hover { background: #131313 !important; }
   body.dark-mode .lista-categoria-item.linha-selecionada { background: #1E3A24 !important; }
+  body.dark-mode .report-card { background:#0D0D0D !important; border-color:#34383F !important; }
+  body.dark-mode .report-card span { color:#E4E2DC !important; }
+  body.dark-mode .report-dropdown { background:#0D0D0D !important; border-color:#34383F !important; color:#E4E2DC !important; }
+  body.dark-mode .dropdown-opcao:hover { background:#131313 !important; }
   body.dark-mode .lista-categoria-item { border-bottom-color: #34383F !important; }
   /* Cobertura ampla: qualquer fundo cinza-claro fixo (barra de navegação,
      caixas de resumo, listas de modal, ficha impressa) fica escuro também */
@@ -668,71 +679,59 @@
   <div id="area-relatorios" class="hidden">
     <div class="card" style="border-radius:0 0 12px 12px;">
 
-      <div class="row" style="gap:6px; margin-bottom:22px; border-bottom:1px solid #E4E0D4; padding-bottom:14px;">
-        <button type="button" id="subnav-acompanhamento" class="primary" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-calendar-due"></i> Acompanhamento anual</button>
-        <button type="button" id="subnav-contagem" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-calculator"></i> Contagem de processos</button>
-        <button type="button" id="subnav-analista" style="font-size:12.5px; padding:6px 14px;"><i class="ti ti-user"></i> Por analista</button>
+      <div class="row" style="gap:12px; flex-wrap:wrap; margin-bottom:24px;">
+        <div class="report-card" id="card-todos" data-tipo="todos"><i class="ti ti-list"></i><span>Todos</span></div>
+        <div class="report-card" id="card-atrasados" data-tipo="ATRASADO"><i class="ti ti-alert-triangle" style="color:#A33;"></i><span>Atrasados</span></div>
+        <div class="report-card" id="card-vencendo" data-tipo="VENCENDO EM BREVE"><i class="ti ti-clock-hour-4" style="color:#85560B;"></i><span>Vencendo em breve</span></div>
+        <div class="report-card" id="card-analista" style="position:relative;"><i class="ti ti-user"></i><span>Por analista</span>
+          <div id="dropdown-analista" class="hidden report-dropdown">
+            <p style="margin:0 0 8px; font-size:11.5px; color:#6B6A62;">Escolha o analista:</p>
+            <div class="dropdown-opcao" data-analista="AUGUSTO">AUGUSTO</div>
+            <div class="dropdown-opcao" data-analista="JESSICA">JESSICA</div>
+            <div class="dropdown-opcao" data-analista="DILCEIA">DILCEIA</div>
+          </div>
+        </div>
+        <div class="report-card" id="card-contagem" style="position:relative;"><i class="ti ti-calculator"></i><span>Contagem de processos</span>
+          <div id="dropdown-contagem" class="hidden report-dropdown" style="width:260px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <p style="margin:0; font-size:11.5px; color:#6B6A62;">Categorias:</p>
+              <div style="display:flex; gap:8px;">
+                <span id="cont-selecionar-todas" style="font-size:10.5px; color:#1B3A5C; cursor:pointer; text-decoration:underline;">Todas</span>
+                <span id="cont-limpar-todas" style="font-size:10.5px; color:#6B6A62; cursor:pointer; text-decoration:underline;">Nenhuma</span>
+              </div>
+            </div>
+            <div id="cont-checkboxes" style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px; max-height:220px; overflow-y:auto;"></div>
+            <button type="button" id="cont-gerar" class="primary" style="width:100%; font-size:12px;">Gerar contagem</button>
+          </div>
+        </div>
       </div>
 
-      <!-- SUB-ABA: ACOMPANHAMENTO ANUAL -->
-      <div id="subview-acompanhamento">
-        <h2 class="section-title">Relatório de acompanhamento anual</h2>
-        <p class="section-sub">Processos das categorias SEDF + SEDF e SEDF + OUTRO que estão atrasados ou perto de vencer o prazo legal de reavaliação anual da compatibilidade.</p>
+      <div id="area-resultado-relatorio" class="report-dropdown" style="position:static; width:100%; transform:none; margin-top:4px; display:none;">
 
-        <div class="row" style="align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
-          <div class="row" style="align-items:center; gap:10px;">
-            <button type="button" id="rel-gerar" class="primary"><i class="ti ti-refresh"></i> Gerar relatório</button>
-            <div style="display:flex; gap:4px; background:#F1EFE8; padding:4px; border-radius:8px;">
-              <button type="button" class="rel-filtro-btn primary" data-filtro="todos" style="border:none; font-size:12px; padding:6px 12px;">Todos</button>
-              <button type="button" class="rel-filtro-btn" data-filtro="ATRASADO" style="border:none; font-size:12px; padding:6px 12px;">Atrasados</button>
-              <button type="button" class="rel-filtro-btn" data-filtro="VENCENDO EM BREVE" style="border:none; font-size:12px; padding:6px 12px;">Vencendo em breve</button>
-            </div>
-          </div>
-          <button type="button" id="rel-exportar" style="font-size:12px; padding:6px 12px;"><i class="ti ti-download"></i> Exportar CSV</button>
-        </div>
+      <!-- SUB-ABA: ACOMPANHAMENTO ANUAL -->
+      <div id="subview-acompanhamento" class="hidden">
+        <h2 class="section-title" id="titulo-acompanhamento" style="margin:0 0 16px;">Relatório</h2>
 
         <div id="rel-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Consultando planilha...</div>
         <div id="rel-resumo"></div>
         <div id="rel-tabela"></div>
       </div>
 
-      <!-- SUB-ABA: CONTAGEM DE PROCESSOS -->
+      <!-- SUB-ABA: CONTAGEM DE PROCESSOS (resultado) -->
       <div id="subview-contagem" class="hidden">
         <h2 class="section-title">Contagem de processos catalogados</h2>
-        <p class="section-sub">Selecione as categorias que deseja somar. Processos duplicados (mesmo número em mais de uma categoria) são contados uma única vez.</p>
-
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <label style="margin:0; font-size:12px; color:#6B6A62;">Categorias</label>
-          <div style="display:flex; gap:12px;">
-            <span id="cont-selecionar-todas" style="font-size:11.5px; color:#1B3A5C; cursor:pointer; text-decoration:underline;">Selecionar todas</span>
-            <span id="cont-limpar-todas" style="font-size:11.5px; color:#6B6A62; cursor:pointer; text-decoration:underline;">Limpar seleção</span>
-          </div>
-        </div>
-        <div id="cont-checkboxes" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:18px;"></div>
-
-        <button type="button" id="cont-gerar" class="primary"><i class="ti ti-calculator"></i> Contar processos</button>
         <div id="cont-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Contando...</div>
         <div id="cont-resultado" style="margin-top:16px;"></div>
       </div>
 
-      <!-- SUB-ABA: POR ANALISTA -->
+      <!-- SUB-ABA: POR ANALISTA (resultado) -->
       <div id="subview-analista" class="hidden">
-        <h2 class="section-title">Processos por analista</h2>
-        <p class="section-sub">Quantidade de processos atribuídos a cada analista (categorias SEDF + SEDF e SEDF + OUTRO), e a lista de atrasados/vencendo específica dessa pessoa.</p>
-
-        <div class="row" style="align-items:center; margin-bottom:18px; gap:10px;">
-          <select id="analista-select">
-            <option value="AUGUSTO">AUGUSTO</option>
-            <option value="JESSICA">JESSICA</option>
-            <option value="DILCEIA">DILCEIA</option>
-          </select>
-          <button type="button" id="analista-gerar" class="primary"><i class="ti ti-refresh"></i> Gerar</button>
-          <button type="button" id="analista-exportar"><i class="ti ti-download"></i> Exportar CSV</button>
-        </div>
-
+        <h2 class="section-title" id="titulo-analista" style="margin:0 0 16px;">Processos por analista</h2>
         <div id="analista-loading" class="hidden" style="font-size:12.5px; color:#6B6A62; padding:8px 0;">Consultando planilha...</div>
         <div id="analista-resumo"></div>
         <div id="analista-tabela"></div>
+      </div>
+
       </div>
 
     </div>
@@ -2231,61 +2230,72 @@ document.getElementById('alerta-sino').addEventListener('click', (e) => {
 });
 document.addEventListener('click', () => document.getElementById('alerta-painel').classList.add('hidden'));
 
-// Sub-abas dentro de Relatórios
+// Sub-áreas de resultado dentro de Relatórios
 const subviewAcompanhamento = document.getElementById('subview-acompanhamento');
 const subviewContagem = document.getElementById('subview-contagem');
 const subviewAnalista = document.getElementById('subview-analista');
-const subnavAcompanhamento = document.getElementById('subnav-acompanhamento');
-const subnavContagem = document.getElementById('subnav-contagem');
-const subnavAnalista = document.getElementById('subnav-analista');
 
 function mostrarSubview(nome) {
+  document.getElementById('area-resultado-relatorio').style.display = 'block';
   subviewAcompanhamento.classList.toggle('hidden', nome !== 'acompanhamento');
   subviewContagem.classList.toggle('hidden', nome !== 'contagem');
   subviewAnalista.classList.toggle('hidden', nome !== 'analista');
-  subnavAcompanhamento.classList.toggle('primary', nome === 'acompanhamento');
-  subnavContagem.classList.toggle('primary', nome === 'contagem');
-  subnavAnalista.classList.toggle('primary', nome === 'analista');
 }
-subnavAcompanhamento.addEventListener('click', () => mostrarSubview('acompanhamento'));
-subnavContagem.addEventListener('click', () => mostrarSubview('contagem'));
-subnavAnalista.addEventListener('click', () => mostrarSubview('analista'));
 
-// ---------------------------------------------------------------------
-// EXPORTAR CSV: função genérica para baixar qualquer lista de objetos
-// ---------------------------------------------------------------------
-function exportarCsv(nomeArquivo, colunas, linhas) {
-  const escapeCsv = (v) => {
-    const s = String(v === undefined || v === null ? '' : v);
-    return /[",;\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-  };
-  const cabecalho = colunas.map(c => escapeCsv(c.titulo)).join(';');
-  const corpo = linhas.map(linha => colunas.map(c => escapeCsv(linha[c.campo])).join(';')).join('\n');
-  const conteudo = '\uFEFF' + cabecalho + '\n' + corpo; // BOM para acentuação correta no Excel
-  const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = nomeArquivo;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+function fecharTodosDropdownsRelatorio() {
+  document.getElementById('dropdown-analista').classList.add('hidden');
+  document.getElementById('dropdown-contagem').classList.add('hidden');
 }
+
+// Cards que geram na hora (Todos / Atrasados / Vencendo em breve)
+['card-todos', 'card-atrasados', 'card-vencendo'].forEach(id => {
+  document.getElementById(id).addEventListener('click', () => {
+    fecharTodosDropdownsRelatorio();
+    filtroRelatorioAtual = document.getElementById(id).getAttribute('data-tipo');
+    const titulos = { 'todos': 'Todos os processos (atrasados + vencendo)', 'ATRASADO': 'Processos atrasados', 'VENCENDO EM BREVE': 'Processos vencendo em breve' };
+    document.getElementById('titulo-acompanhamento').textContent = titulos[filtroRelatorioAtual];
+    mostrarSubview('acompanhamento');
+    gerarRelatorio();
+  });
+});
+
+// Card "Por analista" — abre dropdown para escolher a pessoa
+document.getElementById('card-analista').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const dropdown = document.getElementById('dropdown-analista');
+  const estavaAberto = !dropdown.classList.contains('hidden');
+  fecharTodosDropdownsRelatorio();
+  dropdown.classList.toggle('hidden', estavaAberto);
+});
+document.querySelectorAll('#dropdown-analista .dropdown-opcao').forEach(op => {
+  op.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const analista = op.getAttribute('data-analista');
+    document.getElementById('dropdown-analista').classList.add('hidden');
+    document.getElementById('titulo-analista').textContent = 'Processos de ' + analista;
+    mostrarSubview('analista');
+    gerarRelatorioAnalista(analista);
+  });
+});
+
+// Card "Contagem de processos" — abre dropdown com checkboxes
+document.getElementById('card-contagem').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const dropdown = document.getElementById('dropdown-contagem');
+  const estavaAberto = !dropdown.classList.contains('hidden');
+  fecharTodosDropdownsRelatorio();
+  dropdown.classList.toggle('hidden', estavaAberto);
+});
+
+document.addEventListener('click', fecharTodosDropdownsRelatorio);
+document.getElementById('dropdown-analista').addEventListener('click', (e) => e.stopPropagation());
+document.getElementById('dropdown-contagem').addEventListener('click', (e) => e.stopPropagation());
 
 // ---------------------------------------------------------------------
 // RELATÓRIO DE ACOMPANHAMENTO ANUAL
 // ---------------------------------------------------------------------
 let ultimoRelatorio = [];
 let filtroRelatorioAtual = 'todos';
-
-document.querySelectorAll('.rel-filtro-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    filtroRelatorioAtual = btn.getAttribute('data-filtro');
-    document.querySelectorAll('.rel-filtro-btn').forEach(b => b.classList.toggle('primary', b === btn));
-    renderRelatorio();
-  });
-});
 
 async function gerarRelatorio() {
   const relLoading = document.getElementById('rel-loading');
@@ -2373,18 +2383,6 @@ function renderRelatorio() {
   relTabela.innerHTML = html;
 }
 
-document.getElementById('rel-gerar').addEventListener('click', gerarRelatorio);
-document.getElementById('rel-exportar').addEventListener('click', () => {
-  const filtro = filtroRelatorioAtual;
-  const lista = filtro === 'todos' ? ultimoRelatorio : ultimoRelatorio.filter(r => r.situacao === filtro);
-  if (!lista.length) { alert('Gere o relatório antes de exportar.'); return; }
-  exportarCsv('acompanhamento_anual.csv',
-    [{ titulo: 'Nome', campo: 'nome' }, { titulo: 'Processo', campo: 'processo' }, { titulo: 'Categoria', campo: 'categoria' },
-     { titulo: 'Vencimento', campo: 'dataAcompanhamento' }, { titulo: 'Situação', campo: 'situacao' }, { titulo: 'Analista', campo: 'atribuicao' }],
-    lista
-  );
-});
-
 // ---------------------------------------------------------------------
 // CONTAGEM DE PROCESSOS POR CATEGORIA (com deduplicação)
 // ---------------------------------------------------------------------
@@ -2409,7 +2407,8 @@ document.getElementById('cont-limpar-todas').addEventListener('click', () => {
   TODAS_CATEGORIAS.forEach((cat, i) => { document.getElementById('cont-cb-' + i).checked = false; });
 });
 
-document.getElementById('cont-gerar').addEventListener('click', async () => {
+document.getElementById('cont-gerar').addEventListener('click', async (e) => {
+  e.stopPropagation();
   const selecionadas = TODAS_CATEGORIAS.filter((cat, i) => document.getElementById('cont-cb-' + i).checked);
   const contLoading = document.getElementById('cont-loading');
   const contResultado = document.getElementById('cont-resultado');
@@ -2417,6 +2416,8 @@ document.getElementById('cont-gerar').addEventListener('click', async () => {
     contResultado.innerHTML = '<div class="box"><p class="muted" style="margin:0; font-size:13px;">Selecione ao menos uma categoria.</p></div>';
     return;
   }
+  document.getElementById('dropdown-contagem').classList.add('hidden');
+  mostrarSubview('contagem');
   contLoading.classList.remove('hidden');
   contResultado.innerHTML = '';
   try {
@@ -2452,8 +2453,7 @@ document.getElementById('cont-gerar').addEventListener('click', async () => {
 // ---------------------------------------------------------------------
 let ultimoRelatorioAnalista = [];
 
-document.getElementById('analista-gerar').addEventListener('click', async () => {
-  const analista = document.getElementById('analista-select').value;
+async function gerarRelatorioAnalista(analista) {
   const loading = document.getElementById('analista-loading');
   const resumo = document.getElementById('analista-resumo');
   const tabela = document.getElementById('analista-tabela');
@@ -2516,15 +2516,7 @@ document.getElementById('analista-gerar').addEventListener('click', async () => 
   } finally {
     loading.classList.add('hidden');
   }
-});
-document.getElementById('analista-exportar').addEventListener('click', () => {
-  if (!ultimoRelatorioAnalista.length) { alert('Gere o relatório antes de exportar.'); return; }
-  exportarCsv('processos_por_analista.csv',
-    [{ titulo: 'Nome', campo: 'nome' }, { titulo: 'Processo', campo: 'processo' }, { titulo: 'Categoria', campo: 'categoria' },
-     { titulo: 'Vencimento', campo: 'dataAcompanhamento' }, { titulo: 'Situação', campo: 'situacao' }],
-    ultimoRelatorioAnalista
-  );
-});
+}
 </script>
 </body>
 </html>
