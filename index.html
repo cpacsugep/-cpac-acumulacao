@@ -713,6 +713,7 @@
         <div class="report-card" id="card-todos" data-tipo="todos"><i class="ti ti-list"></i><span>Todos</span></div>
         <div class="report-card" id="card-atrasados" data-tipo="ATRASADO"><i class="ti ti-alert-triangle" style="color:#A33;"></i><span>Atrasados</span></div>
         <div class="report-card" id="card-vencendo" data-tipo="VENCENDO EM BREVE"><i class="ti ti-clock-hour-4" style="color:#85560B;"></i><span>Vencendo em breve</span></div>
+        <div class="report-card" id="card-em-dia" data-tipo="EM DIA"><i class="ti ti-circle-check" style="color:#27500A;"></i><span>Em dia</span></div>
         <div class="report-card" id="card-analista"><i class="ti ti-user"></i><span>Por analista</span></div>
         <div class="report-card" id="card-contagem"><i class="ti ti-calculator"></i><span>Contagem de processos</span></div>
       </div>
@@ -2253,11 +2254,18 @@ function mostrarSubview(nome) {
   subviewAnalista.classList.toggle('hidden', nome !== 'analista');
 }
 
-// Cards que geram na hora (Todos / Atrasados / Vencendo em breve)
-['card-todos', 'card-atrasados', 'card-vencendo'].forEach(id => {
+// Card "Todos" — lista TODOS os processos da planilha, de todas as categorias
+document.getElementById('card-todos').addEventListener('click', () => {
+  document.getElementById('titulo-acompanhamento').textContent = 'Todos os processos catalogados';
+  mostrarSubview('acompanhamento');
+  gerarRelatorioTodos();
+});
+
+// Cards "Atrasados" / "Vencendo em breve" — usam o relatório de acompanhamento anual
+['card-atrasados', 'card-vencendo', 'card-em-dia'].forEach(id => {
   document.getElementById(id).addEventListener('click', () => {
     filtroRelatorioAtual = document.getElementById(id).getAttribute('data-tipo');
-    const titulos = { 'todos': 'Todos os processos (atrasados + vencendo)', 'ATRASADO': 'Processos atrasados', 'VENCENDO EM BREVE': 'Processos vencendo em breve' };
+    const titulos = { 'ATRASADO': 'Processos atrasados', 'VENCENDO EM BREVE': 'Processos vencendo em breve', 'EM DIA': 'Processos em dia' };
     document.getElementById('titulo-acompanhamento').textContent = titulos[filtroRelatorioAtual];
     mostrarSubview('acompanhamento');
     gerarRelatorio();
@@ -2325,6 +2333,58 @@ async function gerarRelatorio() {
   }
 }
 
+// "Todos" — lista TODOS os processos da planilha, de todas as categorias,
+// sem nenhum filtro de atraso/vencimento.
+async function gerarRelatorioTodos() {
+  const relLoading = document.getElementById('rel-loading');
+  const relResumo = document.getElementById('rel-resumo');
+  const relTabela = document.getElementById('rel-tabela');
+  relLoading.classList.remove('hidden');
+  relResumo.innerHTML = '';
+  relTabela.innerHTML = '';
+  try {
+    const resp = await fetch(API_URL + '?action=listarTodosProcessos');
+    const data = await resp.json();
+    if (data.erro) throw new Error(data.erro);
+    const todos = data.resultados || [];
+
+    const porCategoria = {};
+    todos.forEach(r => { porCategoria[r.categoria] = (porCategoria[r.categoria] || 0) + 1; });
+
+    relResumo.innerHTML =
+      '<div class="box" style="text-align:center; border-color:#97C459; background:#EAF3DE; margin-bottom:16px;"><p style="margin:0; font-size:24px; font-weight:600; color:#27500A;">' + todos.length + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#3B6D11;">Processos catalogados no total</p></div>' +
+      '<div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">' +
+      Object.keys(porCategoria).map(cat => '<div style="background:#F1EFE8; border-radius:8px; padding:8px 14px; font-size:12px; color:#2C2C2A;"><strong>' + esc(cat) + ':</strong> ' + porCategoria[cat] + '</div>').join('') +
+      '</div>';
+
+    if (!todos.length) {
+      relTabela.innerHTML = '<div class="box" style="text-align:center;"><p class="muted" style="margin:0; font-size:13px;">Nenhum processo cadastrado ainda.</p></div>';
+      return;
+    }
+
+    let html = '<div style="max-height:520px; overflow-y:auto; border:1px solid #E4E0D4; border-radius:8px;"><table style="width:100%; border-collapse:collapse; font-size:12.5px;">' +
+      '<thead style="position:sticky; top:0; background:#F1EFE8;"><tr style="text-align:left;">' +
+      '<th style="padding:8px 10px;">Nome</th><th style="padding:8px 10px;">Processo</th><th style="padding:8px 10px;">Categoria</th>' +
+      '<th style="padding:8px 10px;">Parecer</th><th style="padding:8px 10px;">Status</th></tr></thead><tbody>';
+
+    todos.forEach(r => {
+      html += '<tr style="border-top:1px solid #E4E0D4;">' +
+        '<td style="padding:7px 10px;">' + esc(r.nome) + '</td>' +
+        '<td style="padding:7px 10px;">' + esc(r.processo) + '</td>' +
+        '<td style="padding:7px 10px;">' + esc(r.categoria) + '</td>' +
+        '<td style="padding:7px 10px;">' + esc(r.parecer) + '</td>' +
+        '<td style="padding:7px 10px;">' + esc(r.status) + '</td>' +
+        '</tr>';
+    });
+    html += '</tbody></table></div>';
+    relTabela.innerHTML = html;
+  } catch (err) {
+    relTabela.innerHTML = '<div class="box" style="border-color:#D98C8C;"><p style="margin:0; font-size:13px; color:#A33;">Erro ao gerar relatório: ' + esc(err.message) + '</p></div>';
+  } finally {
+    relLoading.classList.add('hidden');
+  }
+}
+
 function contarPorAnoVencimento(lista) {
   const porAno = {};
   lista.forEach(r => {
@@ -2356,11 +2416,13 @@ function renderRelatorio() {
   const lista = filtro === 'todos' ? ultimoRelatorio : ultimoRelatorio.filter(r => r.situacao === filtro);
   const totalAtrasados = ultimoRelatorio.filter(r => r.situacao === 'ATRASADO').length;
   const totalVencendo = ultimoRelatorio.filter(r => r.situacao === 'VENCENDO EM BREVE').length;
+  const totalEmDia = ultimoRelatorio.filter(r => r.situacao === 'EM DIA').length;
 
   relResumo.innerHTML =
     '<div class="row" style="margin-bottom:16px; gap:12px;">' +
     '<div class="box" style="flex:1; text-align:center; border-color:#D98C8C; background:#FBEAEA;"><p style="margin:0; font-size:22px; font-weight:600; color:#A33;">' + totalAtrasados + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#8A3A3A;">Atrasados</p></div>' +
     '<div class="box" style="flex:1; text-align:center; border-color:#E8C77A; background:#FAF3E2;"><p style="margin:0; font-size:22px; font-weight:600; color:#85560B;">' + totalVencendo + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#85560B;">Vencendo em breve</p></div>' +
+    '<div class="box" style="flex:1; text-align:center; border-color:#97C459; background:#EAF3DE;"><p style="margin:0; font-size:22px; font-weight:600; color:#27500A;">' + totalEmDia + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#3B6D11;">Em dia</p></div>' +
     '</div>' +
     renderPorAnoHtml(contarPorAnoVencimento(ultimoRelatorio));
 
@@ -2376,8 +2438,9 @@ function renderRelatorio() {
 
   lista.forEach(r => {
     const atrasado = r.situacao === 'ATRASADO';
-    const corTexto = atrasado ? '#A33' : '#85560B';
-    const corFundo = atrasado ? '#FBEAEA' : '#FAF3E2';
+    const emDia = r.situacao === 'EM DIA';
+    const corTexto = atrasado ? '#A33' : (emDia ? '#27500A' : '#85560B');
+    const corFundo = atrasado ? '#FBEAEA' : (emDia ? '#EAF3DE' : '#FAF3E2');
     const diasTexto = atrasado ? (r.diasAtraso + ' dia(s) atrasado') : (Math.abs(r.diasAtraso) + ' dia(s) restante(s)');
     html += '<tr style="border-top:1px solid #E4E0D4;">' +
       '<td style="padding:7px 10px;">' + esc(r.nome) + '</td>' +
@@ -2485,17 +2548,19 @@ async function gerarRelatorioAnalista(analista) {
 
     const totalAtrasados = listaAnalista.filter(r => r.situacao === 'ATRASADO').length;
     const totalVencendo = listaAnalista.filter(r => r.situacao === 'VENCENDO EM BREVE').length;
+    const totalEmDia = listaAnalista.filter(r => r.situacao === 'EM DIA').length;
 
     resumo.innerHTML =
       '<div class="row" style="margin-bottom:16px; gap:12px; flex-wrap:wrap;">' +
       '<div class="box" style="flex:1; min-width:120px; text-align:center; border-color:#97C459; background:#EAF3DE;"><p style="margin:0; font-size:24px; font-weight:600; color:#27500A;">' + contagem.totalUnico + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#3B6D11;">Processos de ' + esc(analista) + '</p></div>' +
       '<div class="box" style="flex:1; min-width:120px; text-align:center; border-color:#D98C8C; background:#FBEAEA;"><p style="margin:0; font-size:24px; font-weight:600; color:#A33;">' + totalAtrasados + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#8A3A3A;">Atrasados</p></div>' +
       '<div class="box" style="flex:1; min-width:120px; text-align:center; border-color:#E8C77A; background:#FAF3E2;"><p style="margin:0; font-size:24px; font-weight:600; color:#85560B;">' + totalVencendo + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#85560B;">Vencendo em breve</p></div>' +
+      '<div class="box" style="flex:1; min-width:120px; text-align:center; border-color:#97C459; background:#EAF3DE;"><p style="margin:0; font-size:24px; font-weight:600; color:#27500A;">' + totalEmDia + '</p><p style="margin:2px 0 0; font-size:11.5px; color:#3B6D11;">Em dia</p></div>' +
       '</div>' +
       renderPorAnoHtml(contarPorAnoVencimento(listaAnalista));
 
     if (!listaAnalista.length) {
-      tabela.innerHTML = '<div class="box" style="text-align:center;"><p class="muted" style="margin:0; font-size:13px;">Nenhum processo atrasado ou vencendo para ' + esc(analista) + '. 🎉</p></div>';
+      tabela.innerHTML = '<div class="box" style="text-align:center;"><p class="muted" style="margin:0; font-size:13px;">Nenhum processo com data de acompanhamento anual atribuído a ' + esc(analista) + '.</p></div>';
       return;
     }
 
@@ -2506,8 +2571,9 @@ async function gerarRelatorioAnalista(analista) {
 
     listaAnalista.forEach(r => {
       const atrasado = r.situacao === 'ATRASADO';
-      const corTexto = atrasado ? '#A33' : '#85560B';
-      const corFundo = atrasado ? '#FBEAEA' : '#FAF3E2';
+      const emDia = r.situacao === 'EM DIA';
+      const corTexto = atrasado ? '#A33' : (emDia ? '#27500A' : '#85560B');
+      const corFundo = atrasado ? '#FBEAEA' : (emDia ? '#EAF3DE' : '#FAF3E2');
       const diasTexto = atrasado ? (r.diasAtraso + ' dia(s) atrasado') : (Math.abs(r.diasAtraso) + ' dia(s) restante(s)');
       html += '<tr style="border-top:1px solid #E4E0D4;">' +
         '<td style="padding:7px 10px;">' + esc(r.nome) + '</td>' +
